@@ -74,9 +74,8 @@ Parser.init_grammar(
             :rp_title, # {optional: :rp_title},
             # Everything after the ingredient list
             {checklist: [
-                { distribute: [ :rp_inglist, :rp_instructions ],
+                { distribute: [ { optional: :rp_inglist_header }, :rp_inglist, :rp_instructions ],
                   under: :rp_recipe_section },
-                # :rp_recipe_section, # [{:repeating => :rp_inglist}, :rp_instructions],
                 {optional: :rp_author},
                 {optional: :rp_prep_time},
                 {optional: :rp_cook_time},
@@ -126,11 +125,14 @@ Parser.init_grammar(
         in_css_match: nil,
         atline: true
     },
-    rp_instructions: nil,
+    :rp_instructions => nil,
     :rp_recipe_section => {
         :distribute => [ :rp_inglist, :rp_instructions ]
     },
-    rp_inglist: { # A label followed by one or more ingredient lines, or two or more ingredient lines
+    :rp_inglist_header => {
+        :in_css_match => 'h4.wprm-recipe-ingredient-group-name'
+    },
+    rp_inglist: {
                   # match: [ { or: [:rp_ingline, :rp_inglist_label], enclose: :non_empty }, { match: :rp_ingline, repeating: true, enclose: :non_empty } ],
                   :match_all => :rp_ingline,
                   :under => :rp_inglist,

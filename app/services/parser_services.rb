@@ -372,11 +372,12 @@ class ParserServices
         when :rp_instructions
           to_keep = child.text.present?
         when :rp_recipe_section
-          # Keep a recipe section iff it has both ingredients and instructions
-          valid_ingredients = child.children.any? { |grandchild| [:rp_inglist, :rp_ingline].include? grandchild.token }
-          valid_instructions = child.children.any? { |grandchild| grandchild.token == :rp_instructions }
-          to_keep = valid_ingredients && valid_instructions
-          child.children = [] unless valid_ingredients # Without the enclosing inglist, delete all children
+          # Keep a recipe section iff it has valid ingredients
+          to_keep = child.traverse { |descendant| break true if descendant.token == :rp_ingline }
+          # valid_ingredients = child.children.any? { |grandchild| [:rp_inglist, :rp_ingline].include? grandchild.token }
+          # valid_instructions = child.children.any? { |grandchild| grandchild.token == :rp_instructions }
+          # to_keep = valid_ingredients && valid_instructions
+          # child.children = [] unless valid_ingredients # Without the enclosing inglist, delete all children
         else
           next unless child.children.present? && child.children.all? { |grandchild| grandchild.token == child.token }
           to_keep = false

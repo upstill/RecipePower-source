@@ -602,17 +602,21 @@ class Parser
       # applies the first repeatedly, then the second, etc., each time constraining
       # the next search to the following result. This allows [ :rp_title, nil ]
       # to match a title, followed by all content up to the next title.
-      spec = list_of_specs.first
-      end_stream = scanner
       new_children = []
-      while end_stream.more? &&
-        (match = match_specification end_stream, spec, context.except(:distribute, :under)).success? do
-        new_children.push match
-        end_stream = match.tail_stream
+      list_of_specs = list_of_specs.clone
+      while new_children.empty? && spec = list_of_specs.shift do
+        end_stream = scanner
+        # Probe for matches on the first spec
+        while end_stream.more? &&
+            (match = match_specification end_stream, spec, context.except(:distribute, :under)).success? do
+          new_children.push match
+          end_stream = match.tail_stream
+        end
+        break unless spec.is_a?(Hash) && spec[:optional]
       end
       children = [ new_children.compact ]
       # Now we have a collection of children due to the first spec
-      list_of_specs[1..-1].each do |spec|
+      while (spec = list_of_specs.shift) do
         new_children = []
         old_children = children.last
         old_children.each_index do |ix|

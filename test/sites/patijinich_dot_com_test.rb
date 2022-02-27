@@ -23,12 +23,13 @@ class PatijinichDotComTest < ActiveSupport::TestCase
     @ingredients = %w{ olive\ oil white\ onion raw\ pine\ nuts garlic\ clove ripe\ tomatoes
     ancho\ chiles freshly\ squeezed\ orange\ juice vegetable\ broth chicken\ broth kosher\ salt sea\ salt
     brown\ sugar white\ button\ mushrooms baby\ bella\ mushrooms unsalted\ butter asparagus fresh\ thyme
-    orange\ zest black\ pepper corn\ tortillas goat\ cheese chives pine\ nuts } # All ingredients found on the page
+    orange\ zest corn\ tortillas goat\ cheese chives pine\ nuts freshly\ ground\ black\ pepper } # All ingredients found on the page
     @units =  %w{ tablespoon tablespoons teaspoon teaspoons ounces cup cups pound } # All units
     @conditions = %w{ chopped packed grated  } # All conditions
     @sample_url = 'https://patijinich.com/asparagus-mushroom-and-goat-cheese-enchiladas-with-pine-nut-mole/'
     @sample_title = 'Asparagus Mushroom & Goat Cheese Enchiladas with Pine Nut Mole Sauce'
 
+=begin
     @ingredients = %w{  sweet\ potatoes lard vegetable\ shortening kosher\ salt coarse\ sea\ salt
       baking\ powder brown\ sugar corn\ masa\ flour masa\ harina chicken\ broth vegetable\ broth
       dried\ corn\ husks refried\ beans Mexican\ crema queso\ fresco
@@ -39,6 +40,7 @@ class PatijinichDotComTest < ActiveSupport::TestCase
 
     @sample_url = 'https://patijinich.com/sweet-potato-and-black-bean-tamales/'
     @sample_title = 'Sweet Potato and Black Bean Tamales'
+=end
 
     super
   end
