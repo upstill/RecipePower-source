@@ -3,7 +3,7 @@ source 'http://rubygems.org'
 ruby '2.6.6'
 gem 'rack', '2.2.3'
 gem 'bundler', '~> 2.1.4'
-gem 'rails', '~> 5.2.4' # 5.0.7.2' #
+gem 'rails', '~> 5.2.4', '>= 5.2.4.3' # 5.0.7.2' #
 gem 'rdoc'
 
 ###### Rails Extensions
@@ -54,24 +54,24 @@ gem 'thin'
 gem 'activity_notification' # , '1.4.4', :path => 'vendor/gems/activity_notification-1.4.4'
 
 ####### JQuery, Coffeescript and Bootstrap
-gem 'jquery-rails', '~> 4.1.0' # '~> 4.2.0' # '~> 4.3.3' # ~> 4.0' # '2.2.1' to get jQuery 1.9.1
+gem 'jquery-rails', '~> 4.1.1' # '~> 4.2.0' # '~> 4.3.3' # ~> 4.0' # '2.2.1' to get jQuery 1.9.1
 ## gem 'jquery-rails-google-cdn'
-gem 'jquery-ui-rails', '~> 3.0'
+gem 'jquery-ui-rails', '~> 3.0', '>= 3.0.1'
 gem 'coffee-rails' # , "~> 4.2"
 gem 'uglifier', '>= 1.3.0'
 ## gem 'compass-rails'
-gem 'sass-rails', " ~> 5.0"
+gem 'sass-rails', '~> 5.1', '>= 5.1.0'
 gem 'bootstrap-sass', '~> 3.3.4' # '~> 3.1.1'
 ## gem 'bootstrap-sass', github: 'thomas-mcdonald/bootstrap-sass', branch: '3'
 gem 'autoprefixer-rails'
 # gem 'jquery-migrate-rails' # TODO: remove after jQuery 1.9 is confirmed  https://jquery.com/upgrade-guide/1.9/
 gem 'masonry-rails'
-gem 'jquery-fileupload-rails', '~> 1.0' # '0.4.7'
+gem 'jquery-fileupload-rails', '~> 1.0', '>= 1.0.0' # '0.4.7'
 gem 'sassc' # , '~> 1.12' # Version 2.0 requires Ruby 2.3
 
 ###### Authentication and authorization
-gem 'devise', '~> 4.0'                       # auth, rails generate devise:install, rails generate devise MODEL
-gem 'devise_invitable', '~> 1.6' # git: 'git://github.com/scambra/devise_invitable.git'
+gem 'devise', '~> 4.7', '>= 4.7.2' # auth, rails generate devise:install, rails generate devise MODEL
+gem 'devise_invitable', '~> 1.7', '>= 1.7.5' # git: 'git://github.com/scambra/devise_invitable.git'
 gem 'ruby-openid'
 gem 'omniauth-twitter'
 gem 'omniauth-facebook', '~> 4.0.0'
@@ -82,8 +82,8 @@ gem 'pundit'
 
 ###### Essential Ruby libs
 gem "rmagick", "~> 2.16.0"
-gem "feedjira", '~> 1.6' #:git => 'git://github.com/pauldix/feedzirra.git'
-gem 'nokogiri', ">= 1.10.8" # "~> 1.5.3"
+gem "feedjira", "~> 1.6", ">= 1.6.0" #:git => 'git://github.com/pauldix/feedzirra.git'
+gem 'nokogiri', '>= 1.13.2' # "~> 1.5.3"
 gem 'truncato' # ,  '0.7.8' # Truncates HTML strings, respecting tags https://github.com/jorgemanrubia/truncato
 # Redcarpet is a Ruby library for Markdown processing that smells like butterflies and popcorn.
 gem 'redcarpet' # https://github.com/vmg/redcarpet
@@ -106,10 +106,10 @@ gem 'capistrano-rbenv', '~> 2.1.0'
 
 ###### External interfaces
 # Extract Pocket/Readability page data into PageRefs
-gem 'mechanize', '~> 2.7.4', :group => [ :development, :staging ]
+gem 'mechanize', '~> 2.7.6', :group => [ :development, :staging ]
 gem 'youtube_addy' # Embed YouTube videos
 ## gem 'active_model_serializers'
-gem 'aws-sdk', '~> 1' # Keep thumbnails using AWS as CDN
+gem 'aws-sdk', '~> 1', '>= 1.67.0' # Keep thumbnails using AWS as CDN
 # Sugg. on StackOverflow to use master right-aws: gem 'right_aws', :git => 'git://github.com/rightscale/right_aws.git'
 
 ## gem 'letsencrypt_plugin'
