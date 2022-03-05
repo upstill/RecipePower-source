@@ -129,11 +129,19 @@ class GrammarFields < Object
       end
     when 'gm_inglist'
       entry = grammar_mods[namestr.to_sym]
-      (entry&.is_a?(Hash) ? entry[:flavor] : entry) || :unordered_list
+      if assign
+        entry[:flavor] = args.first.to_sym
+      else
+        (entry&.is_a?(Hash) ? entry[:flavor] : entry) || :unordered_list
+      end
     when /^(list|line)_class$/ # Specify how ingredient lists and lines will be specified
       list_or_line = $1
       entry = grammar_mods[:gm_inglist]
-      (entry&.is_a?(Hash) && entry[namestr.to_sym]) || ''
+      if assign
+        entry[namestr.to_sym] = args.first
+      else
+        (entry&.is_a?(Hash) && entry[namestr.to_sym]) || ''
+      end
     else
       x=2
     end
