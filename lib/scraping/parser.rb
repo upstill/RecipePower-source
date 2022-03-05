@@ -186,11 +186,11 @@ class Parser
   end
 
   # Match the spec (which may be a symbol referring to a grammar entry), to the current location in the stream
-  def match token, stream: @stream, singular: false
+  def match token, stream: @stream, singular: false, reparse: false
     puts ">>>>>>>>>>> Entering Parse for :#{token} on '#{stream.to_s(trunc: 100, nltr: true)}'" if report_on
     safe_stream = stream.clone
     matched = nil
-    if (valid_to_match?(token, safe_stream)) && (ge = grammar[token])
+    if (reparse || valid_to_match?(token, safe_stream)) && (ge = grammar[token])
       if ge.is_a?(Hash)
         ge = ge.except :match_all if singular
         token = ge.delete(:token) || token

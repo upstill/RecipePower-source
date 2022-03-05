@@ -183,7 +183,7 @@ class ParserServices
     # Recipe parsing includes a Patternista scan of the document and integration of the results
     @parsed = (token == :rp_recipe) ?
                   parse_recipe( annotate: options[:annotate] ) :
-                  parser.match( token, stream: scanner)
+                  parser.match( token, stream: scanner, reparse: true)
 
     # A little sugar: check ingredient line comments for stray ingredient specs
     if @parsed
@@ -247,8 +247,6 @@ class ParserServices
   # parse_on_path: assert the grammar on the element denoted by the path, getting the target token from the element
   def parse_on_path path
     elmt = extract_via_path path
-    #@nkdoc = elmt.ancestors.last
-    # scanner = NokoScanner.new elmt
     if (tokens = nknode_rp_classes(elmt)).present?
       # For direct Tag terminals, short-circuit the parsing process with a tag lookup
       if tagtype = tokens.map { |token| Parser.tagtype(token) }.compact.first # This token calls for a tag
@@ -268,7 +266,8 @@ class ParserServices
           yield typenum, tagstr if block_given?
         end
       else
-        go input: elmt, token: tokens.first
+        @scanner = scanner.within_css_match elmt # Use a scanner whose window matches the target element
+        go token: tokens.first # Do not assert the element as input, b/c that replaces the scanner
         parsed&.enclose_all parser: parser
       end
     end

@@ -192,7 +192,7 @@ module RecipesHelper
   end
 
   def recipe_content_buttons object
-    return ''.html_safe unless policy(object).update? && [PageRef, Recipe, RecipePage, MercuryResult, Gleaning].include?(object.class)
+    return ''.html_safe unless object && policy(object).update? && [PageRef, Recipe, RecipePage, MercuryResult, Gleaning].include?(object.class)
 
     page_ref = object.page_ref
     recipe_page = page_ref.recipe_page
