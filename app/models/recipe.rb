@@ -43,13 +43,16 @@ class Recipe < ApplicationRecord
 
   before_save do |recipe|
     # Arm the recipe for launching
-    recipe.refresh_attributes [ :content ] if
-        recipe.anchor_path_changed? ||
+    if !@being_saved && (recipe.anchor_path_changed? ||
         recipe.focus_path_changed? ||
         (recipe.content.blank? &&
             recipe.anchor_path.present? &&
             recipe.focus_path.present?
-        )
+        ))
+      @being_saved = true
+      recipe.refresh_attributes [ :content ]
+      @being_saved = false
+    end
   end
 
   # For reassigning the kind of the page_ref and/or modifying site's parsing info

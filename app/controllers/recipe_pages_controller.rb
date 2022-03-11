@@ -35,7 +35,11 @@ class RecipePagesController < CollectibleController
 
   # PATCH/PUT /recipe_pages/1
   def update
-    if @recipe_page.update(recipe_page_params)
+    if @recipe_page.update recipe_page_params
+      if @recipe_page.site.saved_change_to_grammar_mods?
+        # When the title selector changes, refresh the recipe_page
+        @recipe_page.refresh_attributes [ :content ]
+      end
       redirect_to @recipe_page, notice: 'Recipe page was successfully updated.'
     else
       render :edit

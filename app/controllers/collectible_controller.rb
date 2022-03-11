@@ -243,7 +243,12 @@ class CollectibleController < ApplicationController
           else
             ' is saved'
           end
-      render :update
+      if params[:goto]
+        redirect_path = pack_path path: url_for(@decorator.object), format: :html
+        render :redirect, locals: { path: redirect_path }
+      else
+        render :update
+      end
     end
   end
 

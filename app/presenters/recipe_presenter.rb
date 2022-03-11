@@ -207,8 +207,8 @@ class RecipePresenter < CollectiblePresenter
     @object.ensure_attributes [ :content ]
     @prpr =
     if @object.content.blank?
-      if @object.page_ref&.gleaning.content.blank?
-        GleaningPresenter.new @object.page_ref&.gleaning, @template, @viewer
+      if @object.page_ref&.gleaning&.content.blank?
+        GleaningPresenter.new @object.page_ref&.gleaning || @object.page_ref.build_gleaning, @template, @viewer
       elsif @object.page_ref&.trimmed_content.blank?
         PageRefPresenter.new @object.page_ref, @template, @viewer
       end

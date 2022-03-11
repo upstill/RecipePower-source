@@ -13,7 +13,7 @@
   </div>
   <div class="recipe-field editing-item icon hidden">
     <%= link_to_submit '',
-                polymorphic_path(f.object, refresh: true),
+                polymorphic_path(f.object, goto: true),
                 title: 'Open Recipe',
                 method: 'PATCH',
                 format: 'json',

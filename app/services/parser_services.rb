@@ -347,7 +347,7 @@ class ParserServices
     # Natural parsing of the recipe failed, so extract a title and subsequent material,
     # up to the next title, if any
     if !@parsed
-      rlist = go options.merge(token: :rp_recipelist) # Parse the same content for a recipe list
+      rlist = go token: :rp_recipelist # Parse the same content for a recipe list
       return @parsed = Seeker.failed(scanner, token: :rp_recipe) unless (rlist&.success? && rp = rlist.find(:rp_recipe).first)
       @parsed = parser.match(:rp_recipe, stream: rp.result_stream)&.if_succeeded || rp
     end

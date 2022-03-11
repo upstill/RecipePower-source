@@ -128,7 +128,7 @@ class GrammarFields < Object
         (grammar_mods[:gm_bundles] || :no_bundle).to_s
       end
     when 'gm_inglist'
-      entry = grammar_mods[namestr.to_sym]
+      entry = grammar_mods[namestr.to_sym] ||= {}
       if assign
         entry[:flavor] = args.first.to_sym
       else
@@ -136,7 +136,7 @@ class GrammarFields < Object
       end
     when /^(list|line)_class$/ # Specify how ingredient lists and lines will be specified
       list_or_line = $1
-      entry = grammar_mods[:gm_inglist]
+      entry = (grammar_mods[:gm_inglist] ||= {})
       if assign
         entry[namestr.to_sym] = args.first
       else

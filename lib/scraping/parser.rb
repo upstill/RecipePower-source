@@ -332,7 +332,7 @@ class Parser
 
   # Maintain instance variable controlling parse logging outside of testing
   def report_on
-    @report_on || Rails.env.test?
+    @report_on || Rails.env.test? || Rails.env.development?
   end
 
   def report_on=bool
