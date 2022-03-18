@@ -102,7 +102,7 @@ class GrammarFields < Object
       $2.pluralize.match /(#{$2})(.*)$/
       { label: "#{what} #{$1.capitalize}(#{$2})", :type => :text }
     when 'gm_bundles'
-      { label: 'Style', :type => :select, choices: [ [ 'None', :no_bundle], ['Wordpress', :wordpress] ], default: gm_bundles }
+      { label: 'Master Style', :type => :select, choices: [ [ 'None', :no_bundle], ['Wordpress', :wordpress] ], default: gm_bundles }
     when 'gm_inglist'
       { label: 'Ingredient-list Style', :type => :select, choices: [ ['Embedded in paragraphs', :inline], ['ul/li list',  :unordered_list], ['Laid out in <p> paragraphs', :paragraph], ['Give selectors directly', :no_inglist ] ], default: gm_inglist }
     end
@@ -113,6 +113,13 @@ class GrammarFields < Object
     return unless name.to_s.match /(\w*)(=)?$/
     namestr, assign = $1, $2
     case namestr
+    when 'paragraph_selector', /^(list|line)_class$/ # Specify how ingredient lists and lines will be specified
+      entry = (grammar_mods[:gm_inglist] ||= {})
+      if assign
+        entry[namestr.to_sym] = args.first
+      else
+        (entry&.is_a?(Hash) && entry[namestr.to_sym]) || ''
+      end
     when /(\w*)_selector$/
       token = ('rp_'+$1).to_sym
       if assign
@@ -133,14 +140,6 @@ class GrammarFields < Object
         entry[:flavor] = args.first.to_sym
       else
         (entry&.is_a?(Hash) ? entry[:flavor] : entry) || :unordered_list
-      end
-    when /^(list|line)_class$/ # Specify how ingredient lists and lines will be specified
-      list_or_line = $1
-      entry = (grammar_mods[:gm_inglist] ||= {})
-      if assign
-        entry[namestr.to_sym] = args.first
-      else
-        (entry&.is_a?(Hash) && entry[namestr.to_sym]) || ''
       end
     else
       x=2

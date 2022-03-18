@@ -26,6 +26,10 @@ module GrammarMods
             return tag
           end
         end
+        def self.final_mod entry, key
+          vals = entry.slice(:in_css_match, :at_css_match, :after_css_match).values
+          entry unless vals.present? && vals.compact.blank?
+        end
         grammar_mods = {}
         if mods_plus
           # Start by mapping high-level modification tags into actual mods
@@ -33,7 +37,10 @@ module GrammarMods
           # They're effectively macro modifications of the grammar.
           # Each :gm_* key MAY have a value to parametrize it
           # Copy actual grammar entries
-          mods_plus.keys.find_all { |key| key.to_s.match /^rp_/ }.each { |key| grammar_mods[key] = mods_plus[key] }
+          mods_plus.keys.filter { |key| key.to_s.match /^rp_/ }.each do |subkey|
+            next unless mf = final_mod(mods_plus.delete(subkey), subkey)
+            grammar_mods[subkey] = mf
+          end
           # Expand :gm_bundle meta-mod(s)
           case mods_plus.delete(:gm_bundles)
           when :wordpress
@@ -50,7 +57,7 @@ module GrammarMods
             }
           end
           # Apply meta-mods
-          mods_plus.keys.find_all { |key| key.to_s.match /^gm_/ }.each do |key|
+          mods_plus.keys.filter { |key| key.to_s.match /^gm_/ }.each do |key|
             params, val = {}, mods_plus[key]
             params, val = val, val.delete(:flavor) if val.is_a?(Hash)
             case key.to_sym
@@ -72,8 +79,13 @@ module GrammarMods
                 }
               when :paragraph
                 # grammar_mods[:rp_inglist] = { :in_css_match => selector_for('p', params ) }
-                grammar_mods[:rp_inglist] = { :in_css_match => selector_for('p', params ), :enclose => false }
-                grammar_mods[:rp_ingline] = { :in_css_match => nil, :inline => true } # , :enclose => false }
+                if (selector = params[:paragraph_selector]).present?
+                  selector = selector_for('p', css_class: selector) unless selector.match /\bp\b[.#]/  # If the selector doesn't include the tag 'p', prepend it
+                else
+                  selector = 'p'
+                end
+                grammar_mods[:rp_inglist] = { :in_css_match => selector, :enclose => false }
+                grammar_mods[:rp_ingline] = { :inline => true } # , :enclose => false }
               end
             end
           end
