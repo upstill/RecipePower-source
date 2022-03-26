@@ -232,6 +232,7 @@ class Seeker
     # The seeker reflects a successful parsing of the (subtree) scanner against the token.
     # Now we should modify the Nokogiri DOM to reflect the elements found
     traverse do |inner|
+      next if block_given? && !yield(inner)
       if inner.token
         with_tag = parser&.tag_for_token(inner.token) || Parser.tag_for_token(inner.token)
         inner.enclose with_tag

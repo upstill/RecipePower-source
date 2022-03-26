@@ -84,7 +84,17 @@ def node_empty? nokonode
   nokonode.children.blank? || nokonode.children.all? { |child| node_empty? child }
 end
 
-# Return all the siblings BEFORE this node
+# Return all the predecessors of the node AS A NODESET
+def nknode_siblings_before node
+  node.parent.children[0...(node.parent.children.find_index { |child| child == node })]
+end
+
+# Return all the successors of the node AS A NODESET
+def nknode_siblings_after node
+  node.parent.children[(node.parent.children.find_index { |child| child == node }+1)..-1]
+end
+
+# Return all the siblings BEFORE this node AS AN ARRAY
 def prev_siblings nokonode
   found = false
   nokonode.parent.children.collect { |child| child unless (found ||= child == nokonode) }.compact
@@ -152,7 +162,13 @@ end
 
 # Should a node be precluded from being enclosed in a tag b/c it has an incompatible ancestor?
 def nknode_has_illegal_enclosure? node, tagname
-  return if tagname.blank?
+  return false if tagname.blank?
+  case tagname
+  when 'li'
+    node.ancestors.each do |anc|
+      return false if ['ul', 'ol'].include?(anc.name)
+    end
+  end
   invalid_enclosures =
       case tagname.to_sym
       when :li, :div, :ul
@@ -169,6 +185,12 @@ def nknode_descends_from? node, tag: nil, token: nil
   node.ancestors.find do |ancestor|
     (tag.blank? || ancestor.name == tag) &&
         (token.blank? || nknode_has_class?(ancestor, token))
+  end
+end
+
+def nknode_elevate_while node
+  while yield(parent = node.parent) do
+    parent.replace parent.children
   end
 end
 

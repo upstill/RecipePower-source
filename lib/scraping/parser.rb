@@ -62,7 +62,7 @@ class Parser
   # How should the token be enclosed?
   def self.tag_for_token token
     case token.to_sym
-    when :rp_recipelist, :rp_recipe, :rp_instructions # :rp_inglist, :rp_ingline
+    when :rp_recipelist, :rp_recipe, :rp_instructions, :rp_recipe_section # :rp_inglist, :rp_ingline
       'div'
     when :rp_inglist
       'ul'
@@ -76,13 +76,20 @@ class Parser
   # How should a successful match on the token be enclosed in the DOM?
   # There are defaults, but mainly it's also a function of the grammar, which is site-dependent
   def tag_for_token token
-    if (grammar_hash = @grammar[token.to_sym]).is_a? Hash
-      if selector = grammar_hash[:in_css_match]
-        selector.split('.').first.if_present
-      elsif grammar_hash[:inline]
-        'span'
-      end
-    end || Parser.tag_for_token(token)
+    case token
+    when :rp_inglist
+      'ul'
+    when :rp_ingline
+      'li'
+    else
+      if (grammar_hash = @grammar[token.to_sym]).is_a? Hash
+        if selector = grammar_hash[:in_css_match]
+          selector.split('.').first.if_present
+        elsif grammar_hash[:inline]
+          'span'
+        end
+      end || Parser.tag_for_token(token)
+    end
   end
 
   # Provide a list of tokens available to match

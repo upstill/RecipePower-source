@@ -31,3 +31,4 @@ config/ssl/local.recipepower.com.key
 config/ssl/req.conf
 .yardoc/
 docs/
+app/views/pages/test.html
