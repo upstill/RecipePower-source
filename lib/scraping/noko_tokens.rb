@@ -428,7 +428,9 @@ class NokoTokens < Array
       # move everything to that node, proceeding as though it serves as BOTH extant_left and extant_right
       # Search for a set of extant nodes in the tree that are suitably tagged
       extant_candidates = nil
-      DomTraversor.new(teleft.text_element, teright.text_element, :enclosed_reversed).walk { |node| extant_candidates = extant_candidates ? (extant_candidates + node.css(selector)) : node.css(selector) }
+      DomTraversor.new(teleft.text_element, teright.text_element, :enclosed_reversed).walk do |node|
+        extant_candidates = extant_candidates ? (extant_candidates + node.css(selector)) : node.css(selector)
+      end
       if extant = extant_candidates.first
         # We've identified a node on which we can hang selected elements.
         # Ensure that we don't try to add it or its ancestor to itself

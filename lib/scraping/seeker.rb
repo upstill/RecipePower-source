@@ -3,7 +3,7 @@ require 'scraping/lexaur.rb'
 
 # A Seeker is an abstract class for a subclass which presents a given item as a subrange of tokens from the given stream
 class Seeker
-  attr_accessor :stream, :token, :children
+  attr_accessor :stream, :token, :children, :failed
   attr_reader :range, :value
   delegate :size, :count, to: :range
   alias_method :length, :size # Number of tokens in the stream
@@ -219,9 +219,10 @@ class Seeker
   end
 
   # Enclose the tokens of the seeker, from beginning to end, in a tag with the given class
+  # We assume that the node's children have their DOM extracted and cleared
   def enclose tag='span'
     return unless @token
-    # Check that some ancestor doesn't already have the tag
+    # Check that some ancestor WHICH IS COEXTENSIVE WITH THE STREAM doesn't already have the tag
     if !head_stream.descends_from?(token: @token)
       head_stream.enclose_to bound, rp_elmt_class: @token, tag: tag, value: @value
     end

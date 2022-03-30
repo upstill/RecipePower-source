@@ -720,6 +720,14 @@ class Parser
       to_match = spec.delete :match
     end
     to_match = spec.delete :match if to_match == true # If any of the above appeared as flags, get match from the :match value
+
+    # Handle a repetitive spec (CSS matches, :match_all directive)
+    if match = match_repeater( scanner, token, to_match, spec, context)
+      return match
+    else
+      match = match_specification(scanner, to_match, token, spec)
+    end
+=begin  NB: This code has been moved into #match_repeater
     # We've extracted the specification to be matched into 'to_match', and use what's left as context for matching
     # If the parse is restricted, enumerate the matches and recur on each
     repeater = spec.slice(:atline, :inline, :in_css_match, :at_css_match, :after_css_match).compact # Discard any nil repeater specs
@@ -776,6 +784,7 @@ class Parser
       # NB: a :retain directive is passed down
       match = match_specification scanner, to_match, token, spec
     end
+=end
     return match if match.success?
     token ||= match.token
     # If not successful, reconcile the spec that was just answered with the provided context
@@ -788,6 +797,67 @@ class Parser
                          token: token,
                          enclose: (really_enclose ? true : false),
                          optional: ((context[:optional] || inspec[:optional] || match.soft_fail?) ? true : false))
+  end
+
+  # CSS matches, plus :atline and :inline and :match_all directives, call for multiple matches.
+  # Here we're responsible for executing those and packaging them up into a single result seeker, if any
+  def match_repeater scanner, token, to_match, spec, context
+    repeater = spec.slice(:atline, :inline, :in_css_match, :at_css_match, :after_css_match).compact # Discard any nil repeater specs
+    if repeater.present?
+      # Hopefully we get a token for enclosing a result collection, in the :under spec
+      spec = spec.except :atline, :inline, :in_css_match, :at_css_match, :after_css_match
+      # Whether to enclose a failed result does not get passed down
+      enclose = spec.delete :enclose
+      last_scanner = scanner
+      matches =
+          scanner.for_each(repeater) do |subscanner|
+            match = match_specification (last_scanner = subscanner), to_match, token, spec
+            # We may have produced a useless match b/c we don't pass :non_empty down
+            case enclose
+            when :multiple # Needs more than one good child
+              match.failed = true if match.children.count { |child| child.success? } < 2
+            when :non_empty
+              match.failed = true unless match.children.any? { |child| child.success? }
+            end
+            if match.success? || (enclose == true)
+              # Keeping this match
+              if context[:match_all]
+                # If repeating, collect and carry on
+                # match
+                (repeater[:inline] || repeater[:in_css_match]) ?
+                    match.clone_with(token: token, range: subscanner.range, enclose: enclose) :
+                    match.clone_with(enclose: enclose)
+              else
+                # Singular match: just return
+                return match.clone_with(stream: scanner)
+                # return match.clone_with(stream: scanner, range: subscanner.range)
+                # return repeater[:atline] ? match : match.clone_with(stream: scanner, range: subscanner.range)
+              end
+            else
+              # Match not to be retained, whether failed or not => continue cycling
+              next
+            end
+            #matches << match.clone_with(token: token, range: subscanner.range)
+            #match = match.clone_with token: token, range: subscanner.range
+          end
+      report_matches matches.compact,
+                     (context[:under] || token),
+                     spec,
+                     spec.merge(enclose: enclose),
+                     last_scanner,
+                     scanner
+    elsif context[:match_all]
+      # ALL the matches, not just one.
+      matches = []
+      first_scanner = scanner
+      while scanner.more? do
+        match = match_specification scanner, to_match, token, spec.except(:enclose)
+        break unless match.success?
+        scanner = match.tail_stream # Release the subscanner's constraint on the result
+        matches << match
+      end
+      report_matches matches, (context[:under] || token), to_match, inspec, first_scanner, scanner
+    end
   end
 
   def consolidate_inglines token, seekers

@@ -136,7 +136,7 @@ Parser.init_grammar(
                   # match: [ { or: [:rp_ingline, :rp_inglist_label], enclose: :non_empty }, { match: :rp_ingline, repeating: true, enclose: :non_empty } ],
                   :match_all => :rp_ingline,
                   :under => :rp_inglist,
-                  :enclose => true
+                  :enclose => :multiple
     },
 =begin
         or: [ { # A label followed by one or more ingredient lines, or two or more ingredient lines

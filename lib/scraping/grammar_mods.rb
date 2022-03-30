@@ -84,7 +84,7 @@ module GrammarMods
                 else
                   selector = 'p'
                 end
-                grammar_mods[:rp_inglist] = { :in_css_match => selector, :enclose => false }
+                grammar_mods[:rp_inglist] = { :in_css_match => selector, :enclose => :multiple }
                 grammar_mods[:rp_ingline] = { :inline => true } # , :enclose => false }
               end
             end
