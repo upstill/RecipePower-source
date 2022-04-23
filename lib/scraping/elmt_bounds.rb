@@ -47,25 +47,51 @@ class ElmtBounds < Array
 
   # Replace the text element in the elmt_bounds array, BUT ONLY IF THE TEXT IS IDENTICAL
   def replace_nth_element ix, text_elmt
-    old_te = nth_elmt ix
-    if old_te.text != text_elmt.text
-      error = "Bogus attempt to set ##{ix}-th element '#{}' to '#{text_elmt.text}'"
+    pair = self[ix]
+    if pair.first.text != text_elmt.text
+      error = "Bogus attempt to set ##{ix}-th element '#{pair.first.text}' to '#{text_elmt.text}'"
+      throw error
+    end
+    if self.length > (ix+1) && (self[ix+1][1] != (pair[1]+text_elmt.text.length))
+      error = "Bogus attempt to set ##{ix}-th element '#{pair.first.text}' to '#{text_elmt.text}'"
       throw error
     end
     self[ix][0] = text_elmt
   end
 
-  # Define the nodeset as the children of relative_to
+  # Define the nodeset to be the children of relative_to
   def attach_nodes_safely nodeset, relative_to
-    # Find the first text element to use as an anchor
-    nodeset.each do |node| # Find a node with a text element to use as anchor
-      if (anchor_te = nknode_first_text_element(node)) && (anchor_ix = find_elmt_index anchor_te)
-        relative_to.children = nodeset
-        # Ensure that the node's text elements are maintained correctly in elmt_bounds
-        # The first text element in the node set becomes the first text element under relative_to
-        update_for relative_to, nknode_first_text_element(relative_to), anchor_ix
-        return relative_to
+    # Find the first and last text elements in the nodeset
+    verify
+    anchor_te, focus_te = nil, nil
+    nodeset.each do |node|
+      if node.text?
+        anchor_te ||= node
+        focus_te = node
       end
+    end
+    return unless anchor_te
+    # Get the indices where the first and last text elements appear in our array
+    anchor_ix, limit_ix = find_elmt_index(anchor_te), find_elmt_index(focus_te)+1
+    relative_to.children = nodeset
+    # For all text elements descendant from relative_to, fix the array
+    mod_ix, mod_offset = anchor_ix, self[anchor_ix][1]
+    relative_to.traverse do |node|
+      if node.text?
+        self[mod_ix] = [node, mod_offset]
+        mod_ix += 1
+        mod_offset += node.text.length
+      end
+    end
+    # If there are fewer text elements than previously, reduce the array
+    if mod_ix < limit_ix
+      while limit_ix < length do
+        self[mod_ix] = self[limit_ix]
+        mod_ix += 1; limit_ix += 1
+      end
+      # Remove the last elements of the array
+      (mod_ix...limit_ix).each { pop }
+      verify
     end
   end
 
@@ -162,7 +188,6 @@ class ElmtBounds < Array
     [first_pos, last_limit]
   end
 
-
   def update_for parent, anchor_te, anchor_ix
     # How many text elements precede anchor_te under parent?
     def preceding_text_elmts te
@@ -194,17 +219,34 @@ class ElmtBounds < Array
     find_index { |rcd| rcd.first.object_id.equal? elmt.object_id }
   end
 
-  # A debugging function: return an array pairing elements in the Nokogiri doc with elements of our array
-  def correspondence
+  # Check self to confirm that all text elements
+  # 1) Are in the proper order in the tree, and
+  # 2) have an appropriate global character offset
+  def verify nknode=nil
     ix = 0
-    result = []
-    @nkdoc.traverse do |node|
+    nkdoc.traverse do |node|
       if node.text?
-        result.push [ self[ix].first, node ]
+        pair = self[ix]
+        if pair.first.text != node.text
+          error = "ElmtBounds violation! Elmt##{ix} '#{pair.first.text}' should be '#{node.text}'."
+          throw error
+        end
         ix += 1
+        if (ix < length) &&
+            (pair.last + pair.first.text.length) != self[ix].last
+          error = "ElmtBounds violation! Length of elmt##{ix} doesn't match offset of next element."
+          throw error
+        end
+        if pair.first.object_id != node.object_id
+          self[ix-1][0] = node
+          #error = "ElmtBounds violation! ##{ix}-th element '#{pair.first.text}' has changed its TextElement"
+          #throw error
+        end
       end
     end
-    result
+    if length != ix
+      error = "ElmtBounds violation! #{length-ix} extra elements"
+      throw error
+    end
   end
-
 end

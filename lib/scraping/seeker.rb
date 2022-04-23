@@ -1,10 +1,13 @@
 require 'scraping/scanner.rb'
 require 'scraping/lexaur.rb'
+require 'scraping/noko_utils.rb'
 
 # A Seeker is an abstract class for a subclass which presents a given item as a subrange of tokens from the given stream
 class Seeker
-  attr_accessor :stream, :token, :children, :failed
-  attr_reader :range, :value
+  attr_accessor :stream, :token, :children, :failed, :nokonode # The DOM node represented by the Seeker
+  attr_reader :range, # The range of tokens included in the result, by token index
+              :value # A result (i.e., a tag) represented by the range of tokens
+
   delegate :size, :count, to: :range
   alias_method :length, :size # Number of tokens in the stream
   # Now #length, #size, and #count provide the number of tokens captured by this seeker
@@ -175,6 +178,12 @@ class Seeker
     labelled ? ("[:#{@token}]" + str) : str
   end
 
+  # Recursively pretty-print a Seeker, appropriately indented
+  def pp indent=0
+    cpp = children ? children.collect { |child| child.pp indent+1 }.join : ''
+    ('    ' * indent) + to_s + "\n" + cpp
+  end
+
   def done?
     bound >= stream.bound
   end
@@ -219,24 +228,46 @@ class Seeker
   end
 
   # Enclose the tokens of the seeker, from beginning to end, in a tag with the given class
-  # We assume that the node's children have their DOM extracted and cleared
+  # We assume that the node's children have their DOM extracted and cleared beforehand
   def enclose tag='span'
-    return unless @token
-    # Check that some ancestor WHICH IS COEXTENSIVE WITH THE STREAM doesn't already have the tag
-    if !head_stream.descends_from?(token: @token)
-      head_stream.enclose_to bound, rp_elmt_class: @token, tag: tag, value: @value
+    return if !@token || empty?
+    result_stream.elmt_bounds.verify
+    # Check that some ancestor WHICH IS COEXTENSIVE WITH THE RESULT STREAM doesn't already have the tag
+    @nokonode = result_stream.ancestor_matching(tag: tag, token: @token, coextensive: true) ||
+        result_stream.ancestor_matching(token: @token, coextensive: true) ||
+        result_stream.ancestor_matching(tag: tag, coextensive: true)
+    unless @nokonode
+      result_stream.elmt_bounds.verify
+      @nokonode = result_stream.enclose_to(bound, rp_elmt_class: @token, tag: tag, value: @value)
+      result_stream.elmt_bounds.verify
     end
+    @nokonode.name = tag # In case the ancestor wasn't priorly tagged
+    nknode_add_classes @nokonode, "rp_elmt #{@token.to_s}"  # If the classes weren't set up properly
+    return @nokonode
   end
 
   # Recursively modify the Nokogiri tree to reflect seekers
   def enclose_all parser: nil
     # The seeker reflects a successful parsing of the (subtree) scanner against the token.
     # Now we should modify the Nokogiri DOM to reflect the elements found
+
+    result_stream.elmt_bounds.verify
+    # First, strip down lists and items to the bare minimum, the better to assemble the parts into :rp_elmt's
+    nkdoc.css('li').each do |nknode|
+      # Collapse all elements (except nknode) that aren't links or spans
+      nknode.traverse { |node|
+        next if %w{ a }.include?(node.name) || node.text? || (node == nknode)
+        parent = node.parent
+        node.replace node.children
+      }
+    end
+    result_stream.elmt_bounds.verify
     traverse do |inner|
       next if block_given? && !yield(inner)
-      if inner.token
+      if inner.token && inner.token != :rp_recipe_section
         with_tag = parser&.tag_for_token(inner.token) || Parser.tag_for_token(inner.token)
         inner.enclose with_tag
+        result_stream.elmt_bounds.verify
       end
     end
   end

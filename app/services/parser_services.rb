@@ -180,6 +180,7 @@ class ParserServices
     parser.cache_init
     # parser.benchmarks_init
 
+    scanner.elmt_bounds.verify
     # Recipe parsing includes a Patternista scan of the document and integration of the results
     @parsed = (token == :rp_recipe) ?
                   parse_recipe( annotate: options[:annotate] ) :
@@ -187,6 +188,7 @@ class ParserServices
 
     # A little sugar: check ingredient line comments for stray ingredient specs
     if @parsed
+      scanner.elmt_bounds.verify
       @parsed.find(:rp_ing_comment).each do |comment|
         next if comment.result_stream.to_s.blank?
         # Scan the comments from ingredient lines for stray ingspecs
@@ -213,22 +215,10 @@ class ParserServices
     @match_benchmarks = parser.benchmark_sum @match_benchmarks
 
     if @parsed&.success?
-      @parsed.enclose_all parser: parser do |seeker_node|
-        # We get a crack at a node before #enclose_all does the standard enclosing thing
-        case seeker_node.token
-        when :rp_inglist
-          newnode = seeker_node.enclose 'ul'
-          newnode.traverse { |elmt| elmt.remove if elmt.name == 'br' }
-          nknode_elevate_while(newnode) { |parent| %w{ span p }.include? parent.name }
-          false
-        when :rp_ingline
-          newnode = seeker_node.enclose 'li'
-          nknode_elevate_while(newnode) { |parent| %w{ strong }.include? parent.name }
-          false
-        else
-          true
-        end
-      end if options[:annotate]
+      if options[:annotate]
+        scanner.elmt_bounds.verify
+        @parsed.enclose_all parser: parser
+      end
       if Rails.env.test?
         # Report the parsing results
         puts "+++++++++ Final parsing result for :#{token}:"

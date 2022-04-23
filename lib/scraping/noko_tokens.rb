@@ -263,7 +263,11 @@ class NokoTokens < Array
 
   # Extract the text element data for the character "at" the given global position.
   def text_elmt_data token_index
-    TextElmtData.new @elmt_bounds, character_position_at_token(token_index)
+    if token_index < 0
+      TextElmtData.new @elmt_bounds, -character_position_at_token(-token_index)
+    else
+      TextElmtData.new @elmt_bounds, character_position_at_token(token_index)
+    end
   end
 
   # Extract all :rp_* classes that have been applied to ancestors of the text element at token 'token_index'

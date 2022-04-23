@@ -628,6 +628,25 @@ class NokoScanner < Scanner
     @tokens.enclosing_classes_at @pos
   end
 
+  # Do the text elements bracketed by my range have a common ancestor with the given tag and token?
+  # If coextensive is true, the ancestor qualifies only if any text it has outside the range is blank
+  def ancestor_matching tag: nil, token: nil, coextensive: true
+    # Get minimal enclosing text
+    te_begin, te_end = text_elmt_data.advance_over_space, text_elmt_data(-bound).retreat_over_space
+    common_ancestors = (te_begin.ancestors & te_end.ancestors)
+    qualified = []
+    common_ancestors[0..-2].each do |anc| # Exclude the top-level fragment from consideration
+      # Quit when we hit an ancestor that has excessive text
+      break if coextensive && ((te_begin.prior_text within: anc).present? || te_end.subsq_text(within: anc).present?)
+      qualified << anc
+    end
+    # Among the qualified ancestors, return the highest-level one that matches BOTH tag and token, or token, or tagname
+    qualified.reverse.each do |anc|
+      return anc if (tag.blank? || (anc.name == tag)) && (token.blank? || (nknode_has_class? anc, token.to_s))
+    end
+    nil
+  end
+
   # Get a scanner whose position is past the end of the given nokonode or nokoscanner,
   # aka the end of the nokonode's last text element
   def past nokonode_or_nokoscanner

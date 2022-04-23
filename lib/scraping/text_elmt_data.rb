@@ -264,6 +264,7 @@ class TextElmtData < Object
         break if !(assign_to_nth_elmt @elmt_bounds_index-1) # End of the line!
       end
     end
+    self
   end
 
   def advance_over_space limit_te=nil
@@ -276,6 +277,7 @@ class TextElmtData < Object
         break if !(assign_to_nth_elmt @elmt_bounds_index+1) # End of the line!
       end
     end
+    self
   end
 
   # Return the text from the beginning to the mark (expressed globally)
