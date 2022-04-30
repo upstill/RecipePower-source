@@ -559,7 +559,7 @@ class NokoScanner < Scanner
   def on_css_match spec
     flag, selector = spec.to_a.first # Fetch the key and value from the spec
     return nil if selector.blank?
-    @tokens.dom_ranges(spec).each do |range|
+    @tokens.dom_ranges(spec) do |range, nokonode|
       # Reject empty ranges for :in_css_match, because
       # 1) it can't be incremented beyond, and
       # 2) an empty set of tokens can't be matched anyway
@@ -574,8 +574,7 @@ class NokoScanner < Scanner
   # Return an ARRAY of scanners, as above
   def on_css_matches spec
     flag, selector = spec.to_a.first # Fetch the key and value from the spec
-    ranges = @tokens.dom_ranges spec
-    ranges.map { |range| scanner_for_range range, flag }.compact
+    @tokens.dom_ranges(spec) { |range, nokonode| scanner_for_range range, flag }.compact
   end
 
   # Divide the scanner into multiple scanners at tokens matching the matcher
@@ -703,14 +702,14 @@ class NokoScanner < Scanner
     subscanner = clone
     directive, selector = options.to_a.first
     begin # Confirm the validity of the selector
-      sample = nkdoc.at_css(selector)
+      sample = nkdoc.at_css selector
     rescue Exception => err
       return []
     end
     # If the whole selector provides no results, try a terminating subpath
     while !sample && selector.sub!(/.*\s+/, '') do
       begin # Confirm the validity of the selector
-        sample = nkdoc.at_css(selector)
+        sample = nkdoc.at_css selector
       rescue Exception => err
         # Try the next subpath on error
         sample = nil
@@ -720,7 +719,7 @@ class NokoScanner < Scanner
 
     (matcher = Hash.new)[((directive == :after_css_match) ? :in_css_match : directive)] = selector
     subscanners = []
-    while (subscanner = subscanner.on_css_match(matcher)) do # || subscanner.on_css_match(at_css_match: selector)) do
+    while (subscanner = subscanner.on_css_match(matcher)) do
       # The subscanner's bounds are those of the css match
       # We need to know where (next_pos) to start the next search
       case directive

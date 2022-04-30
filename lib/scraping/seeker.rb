@@ -4,9 +4,13 @@ require 'scraping/noko_utils.rb'
 
 # A Seeker is an abstract class for a subclass which presents a given item as a subrange of tokens from the given stream
 class Seeker
-  attr_accessor :stream, :token, :children, :failed, :nokonode # The DOM node represented by the Seeker
-  attr_reader :range, # The range of tokens included in the result, by token index
-              :value # A result (i.e., a tag) represented by the range of tokens
+  attr_accessor :stream, # the Stream of characters that was parsed
+                :token, # the token matched in the grammar
+                :children, # seekers matched for matching this one
+                :failed, # reports failed parsing attempt, when that's appropriate
+                :nokonode # The DOM node represented by the Seeker
+  attr_reader :range, # The range of tokens included in the result, by token index on the stream
+              :value # A result (i.e., a tag) represented by the parsed tokens and children
 
   delegate :size, :count, to: :range
   alias_method :length, :size # Number of tokens in the stream
@@ -263,12 +267,9 @@ class Seeker
     end
     result_stream.elmt_bounds.verify
     traverse do |inner|
-      next if block_given? && !yield(inner)
-      if inner.token && inner.token != :rp_recipe_section
-        with_tag = parser&.tag_for_token(inner.token) || Parser.tag_for_token(inner.token)
-        inner.enclose with_tag
-        result_stream.elmt_bounds.verify
-      end
+      next if [ nil, :rp_recipe_section].include? inner.token
+      with_tag = parser&.tag_for_token(inner.token) || Parser.tag_for_token(inner.token)
+      inner.enclose with_tag
     end
   end
 

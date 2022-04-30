@@ -288,34 +288,36 @@ class NokoTokens < Array
   end
 
   # Do the above but for EVERY match on the DOM. Returns a possibly empty array of values
+    # If there is a block given, collect and return the results from that block
+  # Otherwise, simply collect matching DOM ranges and return that set
   def dom_ranges spec
     flag, selector = spec.to_a.first # Fetch the key and value from the spec
-    ranges_in = nkdoc.search(selector)&.map do |found|
-      token_range_for_subtree found
+    pairs = nkdoc.search(selector)&.map do |found|
+      [token_range_for_subtree(found), found]
     end || []
-    ranges_in << token_range_for_subtree(nkdoc) if nkdoc.parent && nkdoc.matches?(selector)
-    # For :at_css_match, ranges_in[i] runs to the beginning of ranges_in[i+1]
-    ranges_out = []
-    while range = ranges_in.shift do
+    # We could be working from a Nokogiri element (as opposed to a whole document).
+    # In that case, check that the element itself matches the selector, and include it if so
+    pairs << [token_range_for_subtree(nkdoc), nkdoc] if nkdoc.parent && nkdoc.matches?(selector)
+    # For :at_css_match, pairs[i] runs to the beginning of pairs[i+1]
+    results = []
+    while pair = pairs.shift do
+      range, nokonode = pair
       # First thing, eliminate subsequent overlapping ranges
-      while ranges_in.present? && range.include?(ranges_in.first) do
-        ranges_in.shift
+      while pairs.present? && range.include?(pairs.first.first) do
+        pairs.shift
       end
       min, max = range.begin, range.end
-      max = (ranges_in.first&.begin || @bound) if flag == :at_css_match
+      if flag == :at_css_match && (next_range = pairs.first&.first)
+        # Limit the range of this match to the beginning of the next
+        max = next_range.begin || @bound
+      end
       while min < @bound && self[min].blank? do min += 1 end
-      ranges_out << (max > min ? min..max : min...min)
+      range = (max > min ? min..max : min...min)
+      results.push ((flag == :in_css_match) && block_given?) ?
+                       yield(range, nokonode) :
+                       range
     end
-=begin
-    ranges.each_index do |ix|
-      min, max = ranges[ix].begin, ranges[ix].end
-      # Discard blank tokens at the beginning
-      max = (ranges[ix+1]&.begin || @bound) if flag == :at_css_match
-      while min < @bound && self[min].blank? do min += 1 end
-      ranges[ix] = max > min ? min..max : min...min
-    end
-=end
-    ranges_out
+    results
   end
 
   # What are the tokens for encompassing the given subtree?

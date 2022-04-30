@@ -727,64 +727,6 @@ class Parser
     else
       match = match_specification(scanner, to_match, token, spec)
     end
-=begin  NB: This code has been moved into #match_repeater
-    # We've extracted the specification to be matched into 'to_match', and use what's left as context for matching
-    # If the parse is restricted, enumerate the matches and recur on each
-    repeater = spec.slice(:atline, :inline, :in_css_match, :at_css_match, :after_css_match).compact # Discard any nil repeater specs
-    # A repeater provides its own engine for repetition (e.g., a CSS match), in which case :match_all is a flag for taking every match
-    # There should only be one repeater specification
-    if repeater.present?
-      # Hopefully we get a token for enclosing a result collection, in the :under spec
-      spec = spec.except :atline, :inline, :in_css_match, :at_css_match, :after_css_match
-      # Whether to enclose a failed result does not get passed down
-      enclose = spec.delete :enclose
-      last_scanner = scanner
-      matches =
-          scanner.for_each(repeater) do |subscanner|
-            match = match_specification (last_scanner = subscanner), to_match, token, spec
-            if match.success? || enclose
-              # Keeping this match
-              if context[:match_all]
-                # If repeating, collect and carry on
-                # match
-                (repeater[:inline] || repeater[:in_css_match]) ?
-                    match.clone_with(token: token, range: subscanner.range, enclose: enclose) :
-                    match.clone_with(enclose: enclose)
-              else
-                # Singular match: just return
-                return match.clone_with(stream: scanner)
-                # return match.clone_with(stream: scanner, range: subscanner.range)
-                # return repeater[:atline] ? match : match.clone_with(stream: scanner, range: subscanner.range)
-              end
-            else
-              # Match not to be retained, whether failed or not => continue cycling
-              next
-            end
-            #matches << match.clone_with(token: token, range: subscanner.range)
-            #match = match.clone_with token: token, range: subscanner.range
-          end
-      return report_matches matches.compact,
-                            (context[:under] || token),
-                            spec,
-                            spec.merge(enclose: enclose),
-                            last_scanner,
-                            scanner
-    elsif context[:match_all]
-      # ALL the matches, not just one.
-      matches = []
-      first_scanner = scanner
-      while scanner.more? do
-        match = match_specification scanner, to_match, token, spec.except(:enclose)
-        break unless match.success?
-        scanner = match.tail_stream # Release the subscanner's constraint on the result
-        matches << match
-      end
-      match = report_matches matches, (context[:under] || token), to_match, inspec, first_scanner, scanner
-    else
-      # NB: a :retain directive is passed down
-      match = match_specification scanner, to_match, token, spec
-    end
-=end
     return match if match.success?
     token ||= match.token
     # If not successful, reconcile the spec that was just answered with the provided context
