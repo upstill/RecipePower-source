@@ -767,20 +767,16 @@ class Parser
                 # If repeating, collect and carry on
                 # match
                 (repeater[:inline] || repeater[:in_css_match]) ?
-                    match.clone_with(token: token, range: subscanner.range, enclose: enclose) :
-                    match.clone_with(enclose: enclose)
+                    match.clone_with(token: token, range: subscanner.range, enclose: enclose, nokonode: subscanner.nokonode) :
+                    match.clone_with(enclose: enclose, nokonode: subscanner.nokonode)
               else
                 # Singular match: just return
-                return match.clone_with(stream: scanner)
-                # return match.clone_with(stream: scanner, range: subscanner.range)
-                # return repeater[:atline] ? match : match.clone_with(stream: scanner, range: subscanner.range)
+                return match.clone_with(stream: scanner, nokonode: subscanner.nokonode)
               end
             else
               # Match not to be retained, whether failed or not => continue cycling
               next
             end
-            #matches << match.clone_with(token: token, range: subscanner.range)
-            #match = match.clone_with token: token, range: subscanner.range
           end
       report_matches matches.compact,
                      (context[:under] || token),

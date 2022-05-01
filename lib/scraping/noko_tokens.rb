@@ -282,9 +282,10 @@ class NokoTokens < Array
   # Provide the token range enclosed by the CSS selector
   # RETURNS: if found, a Range value denoting the first token offset and token limit in the DOM.
   # If not found, nil
+  # NB If a block is given, return the result of that block, called on the range and associated DOM element
   def dom_range selector_or_node
     return unless node = selector_or_node.is_a?(String) ? nkdoc.search(selector_or_node).first : selector_or_node
-    token_range_for_subtree node
+    block_given? ? yield(token_range_for_subtree(node), node) : token_range_for_subtree(node)
   end
 
   # Do the above but for EVERY match on the DOM. Returns a possibly empty array of values

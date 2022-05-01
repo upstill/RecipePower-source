@@ -375,7 +375,7 @@ class StrScanner < Scanner
 end
 
 class NokoScanner < Scanner
-  attr_reader :nkdoc, :tokens
+  attr_reader :nkdoc, :tokens, :nokonode
   delegate :pp, to: :nkdoc
   delegate :elmt_bounds, :token_starts, :token_index_for, :token_range_for_subtree,
            :enclose_tokens, :enclose_selection, to: :tokens
@@ -383,7 +383,7 @@ class NokoScanner < Scanner
   # To initialize the scanner, we build:
   # - an array of tokens, each either a string or an rp_elmt node
   # - a second array of elmt_bounds, each a pair consisting of a text element and an offset in the tokens array
-  def initialize nkdoc_or_nktokens_or_html, pos = 0, bound = nil # length=nil
+  def initialize nkdoc_or_nktokens_or_html, pos = 0, bound = nil, nokonode: nil
     # Take the parameters as instance variables, creating @tokens if nec.
     case nkdoc_or_nktokens_or_html
     when NokoTokens
@@ -398,6 +398,7 @@ class NokoScanner < Scanner
     end
     @bound = bound || @tokens.length
     @pos = (pos <= @bound) ? pos : @bound
+    @nokonode = nokonode
   end
 
   # Return the stream of tokens as an array of strings
@@ -532,20 +533,20 @@ class NokoScanner < Scanner
 
   # Return a scanner, derived from the instance's Nokogiri DOM, restricted to the given CSS match
   def within_css_match selector_or_node
-    if range = @tokens.dom_range(selector_or_node)
-      return NokoScanner.new @tokens, range.begin, range.end
+    @tokens.dom_range(selector_or_node) do |range, nokonode|
+      NokoScanner.new @tokens, range.begin, range.end, nokonode: nokonode
     end
   end
 
-  def scanner_for_range range, how=nil
+  def scanner_for_range range, how=nil, nokonode: nil
     if range.begin >= @pos
       case how
       when :in_css_match, nil
-        NokoScanner.new @tokens, range.begin, range.end if range.end > range.begin
+        NokoScanner.new @tokens, range.begin, range.end, nokonode: nokonode if range.end > range.begin
       when :at_css_match
-        range == (@pos..@bound) ? self : NokoScanner.new(@tokens, range.begin, range.end)
+        range == (@pos..@bound) ? self : NokoScanner.new(@tokens, range.begin, range.end, nokonode: nokonode)
       when :after_css_match
-        NokoScanner.new @tokens, range.end
+        NokoScanner.new @tokens, range.end, nokonode: nokonode
       end
     end
   end
@@ -566,7 +567,7 @@ class NokoScanner < Scanner
       # In general, this is an artifact of the ambiguity inherent in expressing ranges as tokens
       next if flag == :in_css_match && range.size < 1
       # Look at the first range that starts after this scanner, and return the part of the match within the scanner's bounds
-      return (scanner_for_range(range, flag) if range.begin < @bound) if range.begin >= @pos
+      return (scanner_for_range(range, flag, nokonode: nokonode) if range.begin < @bound) if range.begin >= @pos
     end
     nil
   end
@@ -574,7 +575,7 @@ class NokoScanner < Scanner
   # Return an ARRAY of scanners, as above
   def on_css_matches spec
     flag, selector = spec.to_a.first # Fetch the key and value from the spec
-    @tokens.dom_ranges(spec) { |range, nokonode| scanner_for_range range, flag }.compact
+    @tokens.dom_ranges(spec) { |range, nokonode| scanner_for_range range, flag, nokonode: nokonode }.compact
   end
 
   # Divide the scanner into multiple scanners at tokens matching the matcher

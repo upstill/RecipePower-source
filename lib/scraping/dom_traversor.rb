@@ -78,7 +78,10 @@ class DomTraversor
       # The first element of the new tree is the highest ancestor of @anchor_node that can be included in its entirety,
       # i.e., all of its children are in range. There might be NO such element: @anchor_node may have previous siblings
 
-      while path_to_anchor_root.first && !path_to_anchor_root.first.previous && !path_to_anchor_root.first.next do
+      # while path_to_anchor_root.first && !path_to_anchor_root.first.previous && !path_to_anchor_root.first.next do
+      while path_to_anchor_root.first &&
+          # nknode_text_after(path_to_anchor_root.first).blank? &&
+          nknode_text_before(path_to_anchor_root.first).blank? do
         path_to_anchor_root.shift
       end
       result.push path_to_anchor_root.first || anchor_root
@@ -97,7 +100,9 @@ class DomTraversor
 
       # Find the the last node on path_to_focus_element that can be moved in its entirety
       # i.e., the one with no children to the left of the one on the path
-      while path_to_focus_elmt.last && !path_to_focus_elmt.last.next && !path_to_focus_elmt.last.previous do
+      while path_to_focus_elmt.last &&
+          # nknode_text_before(path_to_focus_elmt.last).blank? &&
+          nknode_text_after(path_to_focus_elmt.last).blank? do
         path_to_focus_elmt.pop
       end
       # ...but the search may have consumed the whole path without finding one

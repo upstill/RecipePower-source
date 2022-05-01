@@ -237,7 +237,7 @@ class Seeker
     return if !@token || empty?
     result_stream.elmt_bounds.verify
     # Check that some ancestor WHICH IS COEXTENSIVE WITH THE RESULT STREAM doesn't already have the tag
-    @nokonode = result_stream.ancestor_matching(tag: tag, token: @token, coextensive: true) ||
+    @nokonode ||= result_stream.ancestor_matching(tag: tag, token: @token, coextensive: true) ||
         result_stream.ancestor_matching(token: @token, coextensive: true) ||
         result_stream.ancestor_matching(tag: tag, coextensive: true)
     unless @nokonode
@@ -245,6 +245,10 @@ class Seeker
       @nokonode = result_stream.enclose_to(bound, rp_elmt_class: @token, tag: tag, value: @value)
       result_stream.elmt_bounds.verify
     end
+    stamp_nokonode tag
+  end
+
+  def stamp_nokonode tag='span'
     @nokonode.name = tag # In case the ancestor wasn't priorly tagged
     nknode_add_classes @nokonode, "rp_elmt #{@token.to_s}"  # If the classes weren't set up properly
     return @nokonode
@@ -257,17 +261,32 @@ class Seeker
 
     result_stream.elmt_bounds.verify
     # First, strip down lists and items to the bare minimum, the better to assemble the parts into :rp_elmt's
-    nkdoc.css('li').each do |nknode|
-      # Collapse all elements (except nknode) that aren't links or spans
-      nknode.traverse { |node|
-        next if %w{ a }.include?(node.name) || node.text? || (node == nknode)
-        parent = node.parent
-        node.replace node.children
-      }
+    result_stream.elmt_bounds.verify
+    # First, tag all Nokogiri elements that hit on an :in_css_match directive
+    traverse do |inner|
+      if inner.nokonode
+        # The Seeker includes a Nokogiri element that defines its bounds b/c it hit an :in_css_match
+        inner.stamp_nokonode (parser&.tag_for_token(inner.token) || Parser.tag_for_token(inner.token))
+      end
     end
     result_stream.elmt_bounds.verify
+    # Now go through the Nokogiri doc in search of such elements, and strip out everything
+    # except <a> elements
+    nkdoc.traverse do |nknode|
+      if nknode_has_class?(nknode, 'rp_elmt')
+        nknode.traverse { |node|
+          next if %w{ a }.include?(node.name) ||
+              node.text? ||
+              (node == nknode) ||
+              nknode_has_class?(node, 'rp_elmt')
+          node.replace node.children
+        }
+      end
+    end
+    result_stream.elmt_bounds.verify
+    # Finally, traverse the Seeker tree
     traverse do |inner|
-      next if [ nil, :rp_recipe_section].include? inner.token
+      next if [ nil, :rp_recipe_section].include?(inner.token) || inner.nokonode
       with_tag = parser&.tag_for_token(inner.token) || Parser.tag_for_token(inner.token)
       inner.enclose with_tag
     end
