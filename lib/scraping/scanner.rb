@@ -601,9 +601,9 @@ class NokoScanner < Scanner
     ted.xpath
   end
 
-  def enclose_to limit, rp_elmt_class:, tag: nil, value: nil
+  def enclose_to limit, rp_elmt_class:, tag: nil, value: nil, strict: true
     return unless limit > pos
-    @tokens.enclose_tokens @pos, limit, tag: tag, rp_elmt_class: rp_elmt_class, value: value
+    @tokens.enclose_tokens @pos, limit, tag: tag, rp_elmt_class: rp_elmt_class, value: value, strict: strict
   end
 
   # Provide the text element data for the current character position

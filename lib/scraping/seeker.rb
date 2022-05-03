@@ -242,7 +242,7 @@ class Seeker
         result_stream.ancestor_matching(tag: tag, coextensive: true)
     unless @nokonode
       result_stream.elmt_bounds.verify
-      @nokonode = result_stream.enclose_to(bound, rp_elmt_class: @token, tag: tag, value: @value)
+      @nokonode = result_stream.enclose_to(bound, rp_elmt_class: @token, tag: tag, value: @value, strict: false)
       result_stream.elmt_bounds.verify
     end
     stamp_nokonode tag
@@ -250,6 +250,7 @@ class Seeker
 
   def stamp_nokonode tag='span'
     @nokonode.name = tag # In case the ancestor wasn't priorly tagged
+    @nokonode['value'] ||= @value if @value.present?
     nknode_add_classes @nokonode, "rp_elmt #{@token.to_s}"  # If the classes weren't set up properly
     return @nokonode
   end

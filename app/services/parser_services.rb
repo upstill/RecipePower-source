@@ -196,15 +196,21 @@ class ParserServices
           comment.children.concat scanned
         end
       end
-      # Now scan failed inglines for an embedded ingspec, and replace the line if successful
+      # Now try to redeem failed ingredient lines good by scanning for an embedded ingspec,
+      # replacing the line if successful
       @parsed.find(:rp_inglist).each do |inglist|
         inglist.children.each_index do |ix|
           line = inglist.children[ix]
           next if line.success? || line.result_stream.to_s.blank?
           if (scanned = parser.scan(line.result_stream)&.find { |sc| sc.token == :rp_ingspec })
             children = [scanned]
-            comm = line.result_stream.past scanned.result_stream
-            children << Seeker.new(comm, token: :rp_comment) if comm.more?
+            # Encapsulate any text preceding the result as a comment
+            head = line.result_stream.except scanned.result_stream
+            children.unshift Seeker.new(head, token: :rp_comment) if head.length > 0
+
+            # Ditto for text succeeding the scan
+            tail = line.result_stream.past scanned.result_stream
+            children << Seeker.new(tail, token: :rp_comment) if tail.more?
             inglist.children[ix] = Seeker.new line.result_stream, children: children, token: :rp_ingline # line.children.concat scanned
           end
         end

@@ -192,14 +192,14 @@ class NokoTokens < Array
   ###### The following methods pertain to rearranging a DOM to enclose selected text within a marking element
 
   # Convenience method to specify requisite text in terms of tokens
-  def enclose_tokens first_token_index, limiting_token_index, tag: 'span', rp_elmt_class: nil, value: nil
+  def enclose_tokens first_token_index, limiting_token_index, tag: 'span', rp_elmt_class: nil, value: nil, strict: true
     stripped_text = text_from(first_token_index, limiting_token_index).strip
     return if stripped_text.blank?
     global_character_position_start = character_position_at_token first_token_index
     global_character_position_end = character_position_after_token limiting_token_index
     # Provide a hash of data about the text node that has the token at 'global_character_position_start'
     teleft, teright = TextElmtData.for_range @elmt_bounds, global_character_position_start...global_character_position_end
-    enclose_by_text_elmt_data teleft, teright, tag: tag, rp_elmt_class: rp_elmt_class, value: value
+    enclose_by_text_elmt_data teleft, teright, tag: tag, rp_elmt_class: rp_elmt_class, value: value, strict: strict
   end
 
   # Return the Nokogiri node that was built
@@ -361,7 +361,7 @@ class NokoTokens < Array
 
   # This is the main method for rearranging text in the DOM, enclosing
   # the text denoted by TextElmtData entities teleft and teright IN THEIR ENTIRETY.
-  def enclose_by_text_elmt_data teleft, teright, rp_elmt_class:, tag: 'span', value: nil
+  def enclose_by_text_elmt_data teleft, teright, rp_elmt_class:, tag: 'span', value: nil, strict: true
     # Ignore blank text outside the range
     teleft.advance_over_space teright # Don't pass through each other!
     teright.retreat_over_space teleft
@@ -408,9 +408,10 @@ class NokoTokens < Array
     teright.split and_advance: false # Note the assumption that teleft will be unaffected by teright splitting
 
     # If teleft or teright are descendants of a node that matches the tag and class spec,
-    # expand that node to encompass the whole selection
-    if rp_elmt_class
+    # we expand that node to encompass the whole selection IF the strict flag is set
+    if rp_elmt_class && strict
       selector = "#{tag || 'span'}.#{rp_elmt_class}"
+      # If the strict flag is set, find ancestors of the bracketing text elements that are already tagged as specified
       extant_right, extant_left =
           (teright.ancestors & nkdoc.css(selector)).first,
               (teleft.ancestors & nkdoc.css(selector)).first
