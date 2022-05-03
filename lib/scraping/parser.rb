@@ -743,11 +743,11 @@ class Parser
 
   # CSS matches, plus :atline and :inline and :match_all directives, call for multiple matches.
   # Here we're responsible for executing those and packaging them up into a single result seeker, if any
-  def match_repeater scanner, token, to_match, spec, context
-    repeater = spec.slice(:atline, :inline, :in_css_match, :at_css_match, :after_css_match).compact # Discard any nil repeater specs
+  def match_repeater scanner, token, to_match, inspec, context
+    repeater = inspec.slice(:atline, :inline, :in_css_match, :at_css_match, :after_css_match).compact # Discard any nil repeater specs
     if repeater.present?
       # Hopefully we get a token for enclosing a result collection, in the :under spec
-      spec = spec.except :atline, :inline, :in_css_match, :at_css_match, :after_css_match
+      spec = inspec.except :atline, :inline, :in_css_match, :at_css_match, :after_css_match
       # Whether to enclose a failed result does not get passed down
       enclose = spec.delete :enclose
       last_scanner = scanner
@@ -789,7 +789,7 @@ class Parser
       matches = []
       first_scanner = scanner
       while scanner.more? do
-        match = match_specification scanner, to_match, token, spec.except(:enclose)
+        match = match_specification scanner, to_match, token, inspec.except(:enclose)
         break unless match.success?
         scanner = match.tail_stream # Release the subscanner's constraint on the result
         matches << match
