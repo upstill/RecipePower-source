@@ -48,6 +48,11 @@ class CookingDotNytimesDotComTest < ActiveSupport::TestCase
 =end
   end
 
+  test 'ingredient lines' do
+    html = 'Kosher salt (Diamond Crystal) and black pepper'
+    pt_apply :rp_ingspec, html: html, ingredients: %w{ kosher\ salt black\ pepper }
+  end
+
   test 'ingredient list' do
     # html = '<li class="ingredient-group"><strong>Crust</strong><ul class="ingredients"><li class="ingredient" itemprop="ingredients">1 1/2 cups all purpose flour</li><li class="ingredient" itemprop="ingredients">3 tablespoons sugar</li><li class="ingredient" itemprop="ingredients">1/4 teaspoon salt</li><li class="ingredient" itemprop="ingredients">1/2 cup (1 stick) chilled unsalted butter, cut into 1/2-inch cubes</li><li class="ingredient" itemprop="ingredients">2 tablespoons chilled whipping cream</li><li class="ingredient" itemprop="ingredients">1 large egg yolk</li></ul></li>'
     # pt_apply :rp_inglist, html: html, ingredients: @ingredients, units: @units, conditions: @conditions

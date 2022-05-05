@@ -90,6 +90,7 @@ class Lexaur < Object
         # newpath: the lexaur path from the root to the matched data
         # We want the longest path and the furthest stream that produces a term
         result.propose onwrd, lexpth, strpth
+        onwrd, unskipped = elide onwrd, skipper
         if %w{ , and or }.include? onwrd.peek
           operand = onwrd.peek if onwrd.peek != ','
           # ...and we might be able to extend the current longest_path with tokens from the subsequent result
