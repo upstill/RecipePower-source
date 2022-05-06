@@ -68,6 +68,13 @@ class ElmtBounds < Array
       if node.text?
         anchor_te ||= node
         focus_te = node
+      else
+        node.traverse do |child|
+          if child.text?
+            anchor_te ||= child
+            focus_te = child
+          end
+        end
       end
     end
     return unless anchor_te
