@@ -42,6 +42,13 @@ EOL
   end
 
   test 'css extender' do
+
+    args = CSSExtender.args('div#div1')
+    assert_equal 1, @doc.css(*args).count
+
+    args = CSSExtender.args('div#div*')
+    assert_equal 3, @doc.css(*args).count
+
     args = CSSExtender.args('div.top')
     assert_equal 1, @doc.css(*args).count
 

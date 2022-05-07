@@ -12,51 +12,48 @@ class CSSExtender
   #     ° '*' is a wildcard character matching any input ("str1*str2" is equivalent to /str1.*str2/)
   #     ° '$' is an anchor character for the end of the string  ("str$" is equivalent to /str$  /)
   def self.args selector
-    classes = selector.split '.'
+    classes_and_operands = selector.scan /[.#]|[^.#]+/
     # Each "class" BEGINS with a class reference, which is the only class reference in that string.
     # However, it's possible that the '.' was included in a regex, so we may need to collapse
     # elements if the regex extends beyond a given element
     handler = nil
-    classes.each_index do |class_ix|
-      operand = nil
-      next unless (class_ix > 0) && cls = classes[class_ix]
-      case chr = cls.first
-      when '/'
+    classes_and_operands.each_index do |class_ix|
+      next unless (class_ix > 0) &&
+          (klass = classes_and_operands[class_ix]) &&
+          klass != '.' &&
+          klass != '#'
+      method_name = classes_and_operands[class_ix-1] == '.' ? 'inclass' : 'inid'
+      if klass.first == '/' # A /-delimited regex can follow the specifier
         re = ''
         # Find the end of the regex
         while !self.valid_regex?(re) do
-          substrs = cls.scan /\/|[^\/]+/
+          substrs = klass.scan /\/|[^\/]+/
           while nxt = substrs.shift do
             re << nxt
             break if nxt == '/' && valid_regex?(re)
             if substrs.blank?  # End of this line
               # We've run out this "class" without ending the regex
-              classes[class_ix] << (cls = classes[class_ix+1])
-              classes[class_ix+1] = nil
+              classes_and_operands[class_ix] << (klass = classes_and_operands[class_ix+1])
+              classes_and_operands[class_ix+2] = nil
               break
             end
           end
         end
-        classes[class_ix] = "inclass('#{re[1..-2]}')" + cls[(re.length)..-1]
-        operand = ':'
+        classes_and_operands[class_ix] = "#{method_name}('#{re[1..-2]}')" + klass[(re.length)..-1]
+        classes_and_operands[class_ix-1] = ':'
         handler ||= self.new
       else
-        cls.match /^([$*^\w]+)/
+        klass.match /^([$*^\w]+)/
         matcher = $1
-        operand =
-        if matcher.match /[$*^]/
+        if matcher.match /[$*^]/ # If the id or class contain a metacharacter, resort to our methods
           re = matcher.gsub('*', '.*')
-          classes[class_ix] = "inclass('#{re}')" + cls[(matcher.length)..-1]
+          classes_and_operands[class_ix] = "#{method_name}('#{re}')" + klass[(matcher.length)..-1]
           handler ||= self.new
-          ':'
-        else
-          '.'
+          classes_and_operands[class_ix-1] = ':'
         end
       end
-      classes[class_ix] = operand + classes[class_ix] if operand
-      operand = '.'
     end
-    [classes.compact.join, handler].compact
+    [classes_and_operands.compact.join, handler].compact
   end
 
   def regex(node_set, regex, attribute)
@@ -67,10 +64,17 @@ class CSSExtender
   def inclass(node_set, regex)
     node_set.find_all do |node|
       if classes = node['class']
-        classes.split.any? { |cls|
-          cls =~ /#{regex}/
+        classes.split.any? { |klass|
+          klass =~ /#{regex}/
         }
       end
+    end
+  end
+
+  # Apply the regex to the classes of a node
+  def inid(node_set, regex)
+    node_set.find_all do |node|
+      (id = node['id']) && (id =~ /#{regex}/)
     end
   end
 
