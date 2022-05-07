@@ -144,6 +144,13 @@ def nknode_successor_text_elmt tree, text_elmt
   end
 end
 
+# Check that the node matches the search given in the arguments
+# NB: This is redundant wrt node.matches? except that the latter
+# violates the convention of taking multiple arguments so as to allow for a handler
+def nknode_matches? node, *args
+  node.ancestors.last.search(*args).include?(node)
+end
+
 # Find the first text element under the node with non-blank text
 def first_text_element node, nonblank = true
   node.traverse do |child|
