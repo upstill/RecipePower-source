@@ -43,7 +43,7 @@ class CSSExtender
         classes_and_operands[class_ix-1] = ':'
         handler ||= self.new
       else
-        klass.match /^([$*^\w]+)/
+        klass.match /^([\S.#]+)/
         matcher = $1
         if matcher.match /[$*^]/ # If the id or class contain a metacharacter, resort to our methods
           re = matcher.gsub('*', '.*')

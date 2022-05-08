@@ -284,7 +284,7 @@ class NokoTokens < Array
   # If not found, nil
   # NB If a block is given, return the result of that block, called on the range and associated DOM element
   def dom_range selector_or_node
-    return unless node = selector_or_node.is_a?(String) ? nkdoc.search(selector_or_node).first : selector_or_node
+    return unless node = selector_or_node.is_a?(String) ? nkdoc.search(*CSSExtender.args(selector_or_node)).first : selector_or_node
     block_given? ? yield(token_range_for_subtree(node), node) : token_range_for_subtree(node)
   end
 
@@ -293,12 +293,12 @@ class NokoTokens < Array
   # Otherwise, simply collect matching DOM ranges and return that set
   def dom_ranges spec
     flag, selector = spec.to_a.first # Fetch the key and value from the spec
-    pairs = nkdoc.search(selector)&.map do |found|
+    pairs = nkdoc.search(*CSSExtender.args(selector))&.map do |found|
       [token_range_for_subtree(found), found]
     end || []
     # We could be working from a Nokogiri element (as opposed to a whole document).
     # In that case, check that the element itself matches the selector, and include it if so
-    pairs << [token_range_for_subtree(nkdoc), nkdoc] if nkdoc.parent && nkdoc.matches?(selector)
+    pairs << [token_range_for_subtree(nkdoc), nkdoc] if nkdoc.parent && nkdoc.matches?(*CSSExtender.args(selector))
     # For :at_css_match, pairs[i] runs to the beginning of pairs[i+1]
     results = []
     while pair = pairs.shift do
@@ -413,8 +413,8 @@ class NokoTokens < Array
       selector = "#{tag || 'span'}.#{rp_elmt_class}"
       # If the strict flag is set, find ancestors of the bracketing text elements that are already tagged as specified
       extant_right, extant_left =
-          (teright.ancestors & nkdoc.css(selector)).first,
-              (teleft.ancestors & nkdoc.css(selector)).first
+          (teright.ancestors & nkdoc.css(*CSSExtender.args(selector))).first,
+              (teleft.ancestors & nkdoc.css(*CSSExtender.args(selector))).first
       if extant_left || extant_right
         if extant_right == extant_left
           # The selection is entirely under the requisite node => move OTHER (preceding and succeeding) content out
@@ -437,7 +437,7 @@ class NokoTokens < Array
       # Search for a set of extant nodes in the tree that are suitably tagged
       extant_candidates = nil
       DomTraversor.new(teleft.text_element, teright.text_element, :enclosed_reversed).walk do |node|
-        extant_candidates = extant_candidates ? (extant_candidates + node.css(selector)) : node.css(selector)
+        extant_candidates = extant_candidates ? (extant_candidates + node.css(*CSSExtender.args(selector))) : node.css(*CSSExtender.args(selector))
       end
       if extant = extant_candidates.first
         # We've identified a node on which we can hang selected elements.

@@ -91,7 +91,7 @@ class RecipePresenter < CollectiblePresenter
   # Assemble HTML to represent the DOM subtree denoted by node
   def assemble_tree node, selector = nil
     return node.text.html_safe if node.text?
-    selection = selector ? node.css(selector) : node.children
+    selection = selector ? node.css(*CSSExtender.args(selector)) : node.children
     content = safe_join selection.collect { |child| assemble_tree child }
     classes = node.classes.map &:to_sym
     # Since a node may have multiple rp classes, it's important to prioritize the possibilities
@@ -233,9 +233,9 @@ class RecipePresenter < CollectiblePresenter
   def results_for selector, nkdoc=nil, &block
     nkdoc ||= (@nkdoc ||= Nokogiri::HTML.fragment @object.content)
     if block_given?
-      nkdoc.css(selector).collect &block
+      nkdoc.css(*CSSExtender.args(selector)).collect &block
     else
-      nkdoc.css(selector).collect { |node| node.text }.keep_if(&:present?)
+      nkdoc.css(*CSSExtender.args(selector)).collect { |node| node.text }.keep_if(&:present?)
     end
   end
 

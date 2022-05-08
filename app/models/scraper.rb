@@ -204,7 +204,7 @@ class Scraper < ApplicationRecord
   end
 
   def find_by_selector selector, attribute_name=nil
-    if s = page.search(selector).first
+    if s = page.search(*CSSExtender(selector)).first
       found = attribute_name ? s.attributes[attribute_name.to_s] : s.text
       found.to_s
     end
@@ -966,7 +966,7 @@ class Www_bbc_co_uk_Scraper < Scraper
 
   # Process the items of a list that is preceded by a header
   def headered_list_items header_selector, sibling_tag='ul', title=nil, &block
-    (page.search(header_selector)).each { |hdr|
+    (page.search(*CSSExtender.args(header_selector))).each { |hdr|
       hdr_text = hdr.text.to_s.strip
       # Cycle through the following siblings of the header element in search of the
       # one matching the sibling_tag. Terminate when another header tag appears
@@ -978,7 +978,6 @@ class Www_bbc_co_uk_Scraper < Scraper
         end
         div = div.next_element
       end
-      # hdr.search("~ #{sibling_tag}:first li").each { |li| block.call hdr_text, li } unless title && (title != hdr_text)
     }
   end
 

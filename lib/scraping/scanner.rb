@@ -703,14 +703,14 @@ class NokoScanner < Scanner
     subscanner = clone
     directive, selector = options.to_a.first
     begin # Confirm the validity of the selector
-      sample = nkdoc.at_css selector
+      sample = nkdoc.at_css *CSSExtender.args(selector)
     rescue Exception => err
       return []
     end
     # If the whole selector provides no results, try a terminating subpath
     while !sample && selector.sub!(/.*\s+/, '') do
       begin # Confirm the validity of the selector
-        sample = nkdoc.at_css selector
+        sample = nkdoc.at_css *CSSExtender.args(selector)
       rescue Exception => err
         # Try the next subpath on error
         sample = nil

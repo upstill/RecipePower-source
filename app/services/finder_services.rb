@@ -155,7 +155,7 @@ class FinderServices
         expected_selectors = (finders.find { |finder| finder.label == 'Content' }&.selectors || []) +
                     ParserServices.selectors_for(site)
         self.open_noko(url) { |nkd|  # Wait until the content appears
-          expected_selectors.all? { |selector| nkd.css(selector).present? }
+          expected_selectors.all? { |selector| nkd.css(*CSSExtender.args(selector)).present? }
         }
       end
     end
@@ -164,7 +164,7 @@ class FinderServices
     if Rails.env.test?
       # Report failed selectors during testing
       expected_selectors.each do |selector|
-        puts "Selector '#{selector}' failed in '#{url}'" if nkdoc.css(selector).blank?
+        puts "Selector '#{selector}' failed in '#{url}'" if nkdoc.css(*CSSExtender.args(selector)).blank?
       end
     end
 
@@ -177,7 +177,7 @@ class FinderServices
             (labels.blank? || labels.include?(label))
         # Filter for specified labels, if any
         begin
-          next if (matches = nkdoc.css(selector)).blank?
+          next if (matches = nkdoc.css(*CSSExtender.args(selector))).blank?
         rescue Exception => exc
           raise exc, "CSS Selector (#{selector}) caused an error"
         end

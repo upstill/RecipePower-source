@@ -149,7 +149,7 @@ class SiteServices
       trimmers.each do |trimmer|
         Rails.logger.debug "Trimming with CSS selector #{trimmer}"
         begin
-          matches = @nkdoc.css(trimmer).remove # Protection against bad trimmer
+          matches = @nkdoc.css(*CSSExtender.args(trimmer)).remove # Protection against bad trimmer
         rescue Exception => exc
           raise exc, "CSS Selector (#{trimmer}) caused an error"
         end
@@ -352,7 +352,7 @@ class SiteServices
         raise exc # msg, breakdown[:msg] if dj
       end
     end
-    candidates = summ.keys.collect { |key| @nkdoc.css(key) }.flatten
+    candidates = summ.keys.collect { |key| @nkdoc.css(*CSSExtender.args(key)) }.flatten
     candidates.each do |candidate|
       attribs = candidate.keys
       tag = candidate.name
