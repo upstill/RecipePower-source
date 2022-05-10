@@ -1,5 +1,7 @@
 class CSSExtender
 
+  @@SELECTOR = nil
+
   # Examine a CSS selector string for extensions like regexp support.
   # The return value is an array suitable for splatting into Nokogiri
   # CSS search operators. If there ARE no extensions, the return is
@@ -12,7 +14,8 @@ class CSSExtender
   #     ° '*' is a wildcard character matching any input ("str1*str2" is equivalent to /str1.*str2/)
   #     ° '$' is an anchor character for the end of the string  ("str$" is equivalent to /str$  /)
   def self.args selector
-    # classes_and_operands = selector.scan /[.#\[]|[^.#\[]+/
+    # We keep a memoized copy of the result for repeated calls
+    return @@PROCESSED_ARGS if selector == @@SELECTOR
     classes_and_operands = selector.scan /[.#]|\[[^\]=]+[\]=]|[^.#\[]+/
     # Each "class" BEGINS with a class reference, which is the only class reference in that string.
     # However, it's possible that the '.' was included in a regex, so we may need to collapse
@@ -25,14 +28,6 @@ class CSSExtender
           line == '.' ||
           line == '#' ||
           line.first == '['
-=begin
-      if line.first == '['
-        # For a [attr=val] expression we need to do more work to extract the meta-characters
-        line.match /([^\s>\/'"]+)([~|^$*]?)(=|\])/ # Regex to identify <attrib><op>= and <attrib>]
-        attrib, mod, expr = $1, $2, $3
-        next if expr == ']' # Lone [<attrib>] statement
-      end
-=end
       attribute_name = nil
       method_name, mod =
           case op = classes_and_operands[class_ix-1].first
@@ -104,7 +99,8 @@ class CSSExtender
         end
       end
     end
-    [classes_and_operands.compact.join, handler].compact
+    @@SELECTOR = selector
+    @@PROCESSED_ARGS = [classes_and_operands.compact.join, handler].compact
   end
 
   def regex(node_set, regex, attribute)
