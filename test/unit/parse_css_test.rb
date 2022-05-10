@@ -8,9 +8,9 @@ class ParseCSSTest < ActiveSupport::TestCase
 		
 		<!-- Since we have used * with str, all items with
 			str in them are selected -->
-		<div class="first_str" id="div1">The first div element.</div>
-		<div class="second" id="div2">The second div element.</div>
-		<div class="my-strt" id="div3">The third div element.</div>
+		<div class="first_str" id="div1" data-testid="The Div1 Tested">The first div element.</div>
+		<div class="second" id="div2"data-testid="The Div2 Tested">The second div element.</div>
+		<div class="my-strt" id="div3"data-testid="The Div3 Tested">The third div element.</div>
 		<p class="pgph"><span class="sp1">Paragraph One</span></p>
 		<p class="pgph"><span class="sp1">Paragraph Two</span></p>
   </div>
@@ -33,6 +33,12 @@ EOL
     end
   end
 
+  def test1 selector, count, arg1=nil
+    args = CSSExtender.args(selector)
+    assert_equal arg1, args[0] if arg1
+    assert_equal count, @doc.css(*args).count
+  end
+
   test 'all' do
     try_all 'h1:regex("zone", "value")', @handler, count: 1
     try_all 'div.top', count: 1
@@ -42,41 +48,45 @@ EOL
   end
 
   test 'css extender' do
+    test1 'p.gph$ span./sp[12]/', 2
+    test1 'p./^pgph$/ span', 2
+    test1 'div#div1', 1
+    test1 'div#div*', 3
+    test1 'div.top', 1
+    test1 'div.top h1', 1
+    test1 'p.pgph', 2
+    test1 'p.^pg span.sp*', 2
+    test1 'p.*g*h$ span', 2
+    test1 'p./pgph/ span', 2
+    test1 'p./^pg/ span', 2
+    test1 'p./^pg$/ span', 0
+  end
 
-    args = CSSExtender.args('div#div1')
-    assert_equal 1, @doc.css(*args).count
+  test 'attribute selectors' do
+    # A straight attribute specifier should get passed through
+    test1 'div[data-testid]', 3, 'div[data-testid]'
+    test1 '[data-testid]', 3, '[data-testid]'
+    test1 'div[data-testid="The Div1 Tested"]', 1, 'div[data-testid="The Div1 Tested"]'
+    # Quotes shouldn't matter
+    test1 'div[data-testid=The Div1 Tested]', 1, 'div[data-testid="The Div1 Tested"]'
 
-    args = CSSExtender.args('div#div*')
-    assert_equal 3, @doc.css(*args).count
+    # Metacharacters in a quoted specifier are ignored. Output == input
+    test1 'div[data-testid="Div?"]', 0, 'div[data-testid="Div?"]'
+    test1 'div[data-testid="^Div"]', 0, 'div[data-testid="^Div"]'
+    test1 'div[data-testid="Div?$"]', 0, 'div[data-testid="Div?$"]'
 
-    args = CSSExtender.args('div.top')
-    assert_equal 1, @doc.css(*args).count
+    # A simple regex should get passed in without modification and do a simple match
+    test1 'div[data-testid=/Div1/]', 1, "div:regex('Div1', 'data-testid')"
+    test1 'div[data-testid=/Div?/]', 3, "div:regex('Div?', 'data-testid')"
+    test1 'div[data-testid=/Tested$/]', 3, "div:regex('Tested$', 'data-testid')"
+    test1 'div[data-testid=/^Div1/]', 0, "div:regex('^Div1', 'data-testid')"
+    test1 'div[data-testid=/^The/]', 3, "div:regex('^The', 'data-testid')"
 
-    args = CSSExtender.args('div.top h1')
-    assert_equal 1, @doc.css(*args).count
-
-    args = CSSExtender.args('p.pgph')
-    assert_equal 2, @doc.css(*args).count
-
-    args = CSSExtender.args('p./^pgph$/ span')
-    assert_equal 2, @doc.css(*args).count
-
-    args = CSSExtender.args('p.^pg span.sp*')
-    assert_equal 2, @doc.css(*args).count
-
-    args = CSSExtender.args('p.gph$ span./sp[12]/')
-    assert_equal 2, @doc.css(*args).count
-
-    args = CSSExtender.args('p.*g*h$ span')
-    assert_equal 2, @doc.css(*args).count
-
-    args = CSSExtender.args('p./pgph/ span')
-    assert_equal 2, @doc.css(*args).count
-
-    args = CSSExtender.args('p./^pg/ span')
-    assert_equal 2, @doc.css(*args).count
-
-    args = CSSExtender.args('p./^pg$/ span')
-    assert_equal 0, @doc.css(*args).count
+    test1 'div[data-testid*=/Div1/]', 1, "div:regex('Div1', 'data-testid')"
+    test1 'div[data-testid^="Div1"]', 0, "div:regex('^Div1', 'data-testid')"
+    test1 'div[data-testid*="Div1"]', 1, "div:regex('Div1', 'data-testid')"
+    test1 'div[data-testid^="The"]', 3, "div:regex('^The', 'data-testid')"
+    test1 'div[data-testid$="Tested"]', 3, "div:regex('Tested$', 'data-testid')"
+    test1 'div[data-testid$="Div1"]', 0, "div:regex('Div1$', 'data-testid')"
   end
 end
