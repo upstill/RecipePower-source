@@ -48,8 +48,8 @@ end
 def nknode_add_classes node, css_classes
   absent = css_classes.split.collect { |css_class|
     css_class unless nknode_has_class? node, css_class
-  }.compact.join(' ')
-  node['class'] = "#{node['class']} #{absent}"
+  }.compact
+  node['class'] = "#{node['class']} #{absent.join(' ')}" if absent.present?
 end
 
 def nknode_apply node, rp_elmt_class:, value:

@@ -13,7 +13,7 @@ require 'scraping/site_util.rb'
 #   trimmers: ditto
 # 2) outcomes of the immediately prior parse, which can be examined and tested:
 #   content: HTML output from the parse and markup
-#   nokoscan, nkdoc, tokens, seeker: NokoScanner, Nokogiri::HTML, NokoTokens, and Seeker instances generated in parsing
+#   scanner, nkdoc, tokens, seeker: NokoScanner, Nokogiri::HTML, NokoTokens, and Seeker instances generated in parsing
 #   recipe: the instance of Recipe that resulted from a :recipe parse
 #   page_ref: its associated PageRef
 #   site, gleaning, mercury_result: belong to the PageRef
@@ -26,7 +26,7 @@ module PTInterface
            :grammar, # The state of the grammar
            :patternista, :scan, :scan1, # Pattern matcher
            :trimmers, # Saved to be applied to sites and, ultimately, a parse
-           :nokoscan, # A scanner for the parse
+           :scanner, # A scanner for the parse
            :benchmark, :benchmarks,
            :nkdoc, :tokens, # The Nokogiri doc and Nokotokens
            :seeker, :token, # The output of the last parse and the resulting token
@@ -40,17 +40,18 @@ module PTInterface
 
   # Needs to be called as super from setup in parser test, with the following instance variables set (or not)
   def setup
+    initters = { ingredients: @ingredients || [], units: @units || [], conditions: @conditions || [] }
     # The .yml file is derived from the test file that's being run
     # We find a 'test/sites/*.rb' file in the current stack trace
     Kernel.caller.find { |file| file.match(/test\/sites\/(.*)_test\.rb:/ ) }
     # Turn the file name into a site root
-    root = $1.gsub '_dot_','.' # Convert file stub to site root
-
-    # Get sample url and title, selector, trimmers and grammar mods from config file
-    for_configs root, fetch_site: false do |site, data|
-      defaults = { ingredients: @ingredients || [], units: @units || [], conditions: @conditions || [] }
-      @parse_tester = ParseTester.new defaults.merge(data)
+    if root = $1&.gsub('_dot_','.') # Convert file stub to site root
+      # Get sample url and title, selector, trimmers and grammar mods from config file
+      for_configs root, fetch_site: false do |site, data|
+        initters = initters.merge data
+      end
     end
+    @parse_tester = ParseTester.new initters
 
     @page = @sample_url
     @title = @sample_title
@@ -65,7 +66,7 @@ end
 # This class defines a test bed for parsing in the context of site data, i.e. Finders, trimmers and content selectors
 # Each instance is meant to establish parsing for pages of a specific site
 class ParseTester < ActiveSupport::TestCase
-  attr_reader :nokoscan, # A scanner for the parse
+  attr_reader :scanner, # A scanner for the parse
               :seeker, # The output of the last parse
               :parser, # The current parser, with modified grammar according to initialization parameters
               :selector, # Used by a site to select content
@@ -79,7 +80,7 @@ class ParseTester < ActiveSupport::TestCase
               :lexaur # The current lexaur, which gathers tags on initialization and can be augmented by other tags
   delegate :mercury_result, :gleaning, :site, to: :page_ref
   delegate :'success?', :head_stream, :tail_stream, :find, :hard_fail?, :find_value, :find_values, :value_for, :xbounds, :token, :found_string, :found_strings, to: :seeker
-  delegate :nkdoc, :tokens, to: :nokoscan
+  delegate :nkdoc, :tokens, to: :scanner
   delegate :grammar, :patternista, to: :parser
   delegate :scan, :scan1, to: :patternista
 

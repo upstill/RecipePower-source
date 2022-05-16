@@ -168,7 +168,7 @@ EOF
     nonsense = 'No Intention To Parse This String'
 
     # Check that the grammar doesn't get changed gratuitously
-    grammar = Parser.new(nonsense, @lex, { :rp_bogus1 => :rp_bogus2 }).grammar.except(:rp_bogus1)
+    grammar = Parser.new(nonsense, @lex).grammar.except(:rp_bogus1)
     assert_equal Array, grammar[:rp_amt][:match].class
 
                                              # Check for grammar violations
@@ -460,7 +460,7 @@ EOF
     pt_apply :rp_embedded_inglist,
              html: "1 pound softened butter, 1 pound brown sugar, 1 pound white sugar, 1 tablespoon ground cinnamon and 1 teaspoon each ground clove and ground nutmeg"
     assert_equal 5, seeker.find(:rp_ingspec).count
-    subscanners = nokoscan.split(',')
+    subscanners = scanner.split(',')
     assert_equal 4, subscanners.count
   end
 
@@ -766,9 +766,9 @@ EOF
     <span class="rp_elmt rp_ingspec">
       <span class="rp_elmt rp_amt_with_alt rp_amt">
         <span class="rp_elmt rp_num">3/4</span> 
-        <span class="rp_elmt rp_unit rp_unit_tag">ounce</span>
+        <span class="rp_elmt rp_unit rp_unit_tag" value="ounce">ounce</span>
       </span> 
-      <span class="rp_elmt rp_ingredient_tag rp_ingalts">simple syrup</span> 
+      <span class="rp_elmt rp_ingredient_tag rp_ingalts" value="simple syrup">simple syrup</span> 
     </span> 
     <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span> 
   </li>
@@ -791,10 +791,10 @@ EOF
 <ul class="rp_elmt rp_inglist">
   <li class="rp_elmt rp_ingline"><span class="rp_elmt rp_ingspec">
     <span class="rp_elmt rp_amt_with_alt rp_amt">
-      <span class="rp_elmt rp_num">3/4</span> 
-      <span class="rp_elmt rp_unit_tag rp_unit">ounce</span>
-    </span>
-    <span class="rp_elmt rp_ingalts rp_ingredient_tag" value="simple syrup">simple syrup</span>
+      </span><span class="rp_elmt rp_ingspec"><span class="rp_elmt rp_amt"><span class="rp_elmt rp_num">3/4</span> 
+      <span class="rp_elmt rp_unit_tag rp_unit" value="ounce">ounce</span></span>
+    
+    <span class="rp_elmt rp_ingalts rp_ingredient_tag" value="simple syrup">simple syrup</span></span>
     <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span> 
   </span></li>
 </ul>
@@ -805,7 +805,7 @@ EOF
     html = <<EOF
     <span class="rp_elmt rp_amt">
       <span class="rp_elmt rp_num">3/4</span> 
-      <span class="rp_elmt rp_unit_tag rp_unit">ounce</span>
+      <span class="rp_elmt rp_unit_tag rp_unit" value="ounce">ounce</span>
     </span>
 EOF
     pt_apply :rp_amt, html: html, units: 'ounce'
@@ -816,7 +816,7 @@ EOF
   <li class="rp_elmt rp_ingline"><span class="rp_elmt rp_ingspec">
     <span class="rp_elmt rp_amt_with_alt rp_amt">
       <span class="rp_elmt rp_num">3/4</span> 
-      <span class="rp_elmt rp_unit_tag rp_unit">ounce</span>
+      <span class="rp_elmt rp_unit_tag rp_unit" value="ounce">ounce</span>
     </span>
       <span class="rp_elmt rp_ingalts rp_ingredient_tag" value="simple syrup">simple syrup</span>
   </span></li>
@@ -856,8 +856,8 @@ EOF
              ingredients: 'Angostura',
              units: 'dash'
 
-    # html = 'Some irrelevant nonsense followed by 1 ounce of bourbon, 1 ounce of Frangelico, 3/4 ounce lemon juice, 3/4 ounce simple syrup (equal parts sugar and hot water) and a dash of Angostura.'
-    html = '1 ounce of bourbon, 1 ounce of Frangelico, 3/4 ounce lemon juice, <span class="rp_elmt rp_ingline"><span class="rp_elmt rp_amt_with_alt rp_amt"><span class="rp_elmt rp_num">3/4</span> <span class="rp_elmt rp_unit">ounce</span></span> <span class="rp_elmt rp_ingredient_tag rp_ingspec">simple syrup</span> <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span> </span>and a dash of Angostura.'
+    # html = 'Some irrelevant nonsense followed by 1 ounce of bourbon, 1 ounce of Frangelico, 3/4 ounce lemon juice, 3/4 ounce simple syrup (equal parts sugar and hot water) and a dash of Angostura'
+    html = '1 ounce of bourbon, 1 ounce of Frangelico, 3/4 ounce lemon juice, <span class="rp_elmt rp_ingline"><span class="rp_elmt rp_amt_with_alt rp_amt"><span class="rp_elmt rp_num">3/4</span> <span class="rp_elmt rp_unit">ounce</span></span> <span class="rp_elmt rp_ingredient_tag rp_ingspec">simple syrup</span> <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span> </span>and a dash of Angostura'
     pt_apply :rp_embedded_inglist,
              html: html,
              ingredients: %w{ bourbon Frangelico lemon\ juice simple\ syrup Angostura }

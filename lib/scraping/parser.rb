@@ -200,7 +200,7 @@ class Parser
     if (reparse || valid_to_match?(token, safe_stream)) && (ge = grammar[token])
       if ge.is_a?(Hash)
         ge = ge.except :match_all if singular
-        token = ge.delete(:token) || token
+        token = ge[:token] || token
       end
       if @benchmarks
         @cache_tries = @cache_hits = @cache_misses = 0
@@ -760,7 +760,8 @@ class Parser
               match.failed = true if match.children.count { |child| child.success? } < 2
             when :non_empty
               match.failed = true unless match.children.any? { |child| child.success? }
-            end
+            end unless repeater[:in_css_match] # We report all hits on bounded CSS selectors
+            # ...which is a little funky--but if a CSS hit is successful, it should be recorded.
             if match.success? || (enclose == true)
               # Keeping this match
               if context[:match_all]

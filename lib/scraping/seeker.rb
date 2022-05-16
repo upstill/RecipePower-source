@@ -519,7 +519,7 @@ class NumberSeeker < Seeker
 
   # Does the string have an integer followed by a fraction?
   def self.num2 str
-    str&.match /^(\d+)[ -]?((\d*\/{1}\d*|[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞])$|^\d*)$/
+    str&.match /^(\d+)[ -]?((\d+\/{1}\d*|[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞])$|^\d*)$/
   end
 
   # Does the string have an integer followed by a fraction?
