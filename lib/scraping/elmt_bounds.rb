@@ -36,12 +36,12 @@ class ElmtBounds < Array
   # Return the token_index-th text element
   def elmt_offset_at token_index
     # Defaults to the character position BEYOND the last text element
-    (self[token_index]&.last if token_index) || (last.last + self.last.first.to_s.length)
+    (self[token_index]&.last if token_index) || (last.last + last.first.text.length)
   end
 
   def split_elmt_at ix, first_te, second_te
     self[ix][0] = first_te
-    second_start = self[ix].last + first_te.to_s.length
+    second_start = self[ix].last + first_te.text.length
     insert (ix += 1), [second_te, second_start]
   end
 

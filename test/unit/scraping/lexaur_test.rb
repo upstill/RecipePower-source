@@ -105,7 +105,7 @@ class LexaurTest < ActiveSupport::TestCase
       assert_not_nil data
       assert_includes data, 1
       assert_equal 2, stream.pos
-      assert_nil stream.first
+      refute stream.more?
     end
 
     scanner = StrScanner.new 'jalapeño peppers, and more'

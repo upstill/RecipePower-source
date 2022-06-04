@@ -151,7 +151,7 @@ class PageRefTest < ActiveSupport::TestCase
   end
 
   test "try substitute absorbs" do
-    mpgood = PageRef.fetch 'https://oaktownspiceshop.com/blogs/recipes/roasted-radicchio-and-squash-salad-with-burrata'
+    mpgood = PageRef.fetch 'https://oaktownspiceshop.com/blogs/recipes/eastern-mediterranean-vegetable-kabobs-and-yogurt-dip'
     assert_good mpgood
 
     url = 'https://oaktownspiceshop.com/blogs/recipe/roasted-radicchio-and-squash-salad-with-burrata'
@@ -235,7 +235,7 @@ class PageRefTest < ActiveSupport::TestCase
     assert_equal "https://media.wired.com/photos/5926b676af95806129f50602/191:100/w_1280,c_limit/Rosetta_impact-1.jpg", mp.picurl
     assert_equal 'www.wired.com', mp.domain
     assert_equal 'Time to break out the tissues, space fans.', mp.mercury_result.description
-    assert_operator 600, :<=, mp.mercury_result.word_count
+    assert_operator 528, :<=, mp.mercury_result.word_count
     assert_equal 'ltr', mp.mercury_result.direction
     assert_equal 1, mp.mercury_result.total_pages
     assert_equal 1, mp.mercury_result.rendered_pages

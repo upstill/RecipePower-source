@@ -63,7 +63,9 @@ class TagTest < ActiveSupport::TestCase
         assert_equal Tag.assert("joes-bar-grille-and-restaurant"), Tag.assert(" Joe's Bar, Grille and   - -Restaurant  ")
         assert_equal Tag.assert(" Jills Bar, Grille and   - -Restaurant  "), Tag.assert("jills-bar-grille-and-restaurant")
         chock_full_o_punctuation = %q{chock.full,'‘of’“punctuation”'"}
-        assert_equal Tag.assert("chockfullofpunctuation"), Tag.assert(chock_full_o_punctuation)
+        generic = Tag.assert("chockfullofpunctuation")
+        stripped = Tag.assert(chock_full_o_punctuation)
+        assert_equal generic, stripped
     end
 
     # :matchall does not match substring

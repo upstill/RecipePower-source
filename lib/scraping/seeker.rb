@@ -147,7 +147,7 @@ class Seeker
     if block_given? ? block.call(self) : (token == target)
       [ self ]
     elsif @children
-      @children.map { |child| child.find target, &block }.flatten.compact
+      @children.compact.map { |child| child.find target, &block }.flatten.compact
     else
       []
     end
@@ -692,7 +692,7 @@ class AmountSeeker < Seeker
   def initialize stream, num, unit
     super stream, range: Seeker.bracket_children((num if num.is_a?(Seeker)), unit)
     @num = num
-    @children = [@unit = unit]
+    @children = [@unit = unit].compact
     @token = :rp_amt
   end
 

@@ -16,6 +16,6 @@
     :in_css_match:
   :gm_inglist:
     :flavor: :paragraph
-    :selector: div.ingredient-text p
+    :paragraph_selector: div.ingredient-text p
 :sample_url: http://everydayannie.com/2013/07/31/ginger-garlic-salmon-with-cabbage-salad/
 :sample_title: Ginger Garlic Salmon with Cabbage Salad

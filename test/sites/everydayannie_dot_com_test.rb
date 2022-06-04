@@ -68,17 +68,14 @@ div#directions ul
 
   test 'mapping in grammar mods' do
     # Apply tests to the grammar resulting from the grammar_mods here
-    assert_equal @grammar_mods[:gm_inglist][:selector], grammar[:rp_inglist][:in_css_match]
+    assert_equal @parse_tester.grammar_mods[:gm_inglist][:paragraph_selector], grammar[:rp_inglist][:in_css_match]
     assert_nil grammar[:rp_ingline][:in_css_match]
     assert grammar[:rp_ingline][:inline]
   end
 
   test 'juice of half a lime' do
-    html = 'Juice of ½ lime'
-    pt_apply :rp_ingline, html: html
-    html = 'Juice of ½ a lime'
-    pt_apply :rp_ingline, html: html
-    x=2
+    pt_apply :rp_ingline, string: 'Juice of ½ lime'
+    pt_apply :rp_ingline, string: 'Juice of ½ a lime'
   end
 
   test 'ingredient list' do

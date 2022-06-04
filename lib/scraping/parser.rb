@@ -87,7 +87,7 @@ class Parser
           # If the node ALREADY matches the selector, we return the node's name
           # Unfortunately, this is apparently the only way to determine if a node matches a selector:
           # search a NodeSet for the selector and check if the match is at the node
-          return node.name if Nokogiri::XML::NodeSet.new(node.document, [node]).at_css(selector) == node
+          return node.name if node && (Nokogiri::XML::NodeSet.new(node.document, [node]).at_css(selector) == node)
           selector.split(',').first.split('.').first.if_present
         elsif grammar_hash[:inline]
           'span'

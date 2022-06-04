@@ -52,7 +52,7 @@ end
 # Brute-force moving all the text enclosed in the tree between anchor_elmt and focus_elmt, inclusive,
 # into an enclosure that's a child of their common ancestor--unless there's already an ancestor tagged
 # according to spec, or can be so modified.
-def assemble_tree_from_nodes anchor_elmt, focus_elmt, rp_elmt_class:, tag: :span, value: nil
+def assemble_tree_from_nodes anchor_elmt, focus_elmt, rp_elmt_class: nil, tag: :span, value: nil, reattach: false
 
   # Ignore blank text outside the range
   anchor_elmt, focus_elmt = tighten_text_elmt_enclosure anchor_elmt, focus_elmt
@@ -72,16 +72,22 @@ def assemble_tree_from_nodes anchor_elmt, focus_elmt, rp_elmt_class:, tag: :span
   # the new tree.
   # Create a Nokogiri node from the parameters
   throw "Can't #assemble_tree_from_nodes where tag is not a string or a symbol" if !(tag.is_a?(String) || tag.is_a?(Symbol))
-  newtree = (Nokogiri::HTML.fragment html_enclosure(tag: tag, rp_elmt_class: rp_elmt_class, value: value)).children[0]
+  newtree = if rp_elmt_class
+              (Nokogiri::HTML.fragment html_enclosure(tag: tag, rp_elmt_class: rp_elmt_class, value: value)).children[0]
+            else
+              Nokogiri::HTML.fragment ''
+            end
   # We let #node_walk determine the insertion point: successor_node is the node that comes AFTER the new tree
   iterator = DomTraversor.new anchor_elmt, focus_elmt, :enclosed
   iterator.walk do |node|
     newtree.add_child node
   end
-  if iterator.successor_node # newtree goes where focus_root was
-    iterator.successor_node.previous = newtree
-  else # The focus node was the last child, and now it's gone => make newtree be the last child
-    common_ancestor.add_child newtree
+  if reattach # For modifying the source tree, not just clipping the material out
+    if iterator.successor_node # newtree goes where focus_root was
+      iterator.successor_node.previous = newtree
+    else # The focus node was the last child, and now it's gone => make newtree be the last child
+      common_ancestor.add_child newtree
+    end
   end
   # validate_embedding newtree
   return newtree

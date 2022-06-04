@@ -187,19 +187,19 @@ class SiteTest < ActiveSupport::TestCase
     assert_equal longer_site, dpr1.site
 =end
 
-    nyt1 = "http://www.nytimes.com/2015/08/24/business/economy/as-minimum-wage-rises-restaurants-say-no-to-tips-yes-to-higher-prices.html"
+    nyt1 = "https://www.theguardian.com/us-news/2021/dec/30/colorado-wildfires-evacuations-latest"
     pr1 = PageRef.fetch nyt1
     short_site = pr1.site
-    assert_equal "www.nytimes.com", short_site.root
+    assert_equal "www.theguardian.com", short_site.root
     pr1.save
 
-    nyt2 = "http://www.nytimes.com/2016/12/13/dining/restaurants-no-tipping-service.html?ref=dining"
+    nyt2 = "https://www.theguardian.com/us-news/2022/jun/02/coal-slide-colorado-workers-killed-xcel-energy"
     pr2 = PageRef.fetch nyt2
     assert_equal short_site, pr2.site
     pr2.save
 
-    long_site = Site.create sample: nyt2, home: 'http://www.nytimes.com/2016', root: 'www.nytimes.com/2016'
-    assert_equal "www.nytimes.com/2016", long_site.root
+    long_site = Site.create sample: nyt2, home: 'https://www.theguardian.com/us-news/2022/jun/02', root: 'www.theguardian.com/us-news/2022/jun/02'
+    assert_equal "www.theguardian.com/us-news/2022/jun/02", long_site.root
     pr1.reload
     assert_equal short_site.id, pr1.site_id
     pr2.reload
@@ -227,7 +227,7 @@ class SiteTest < ActiveSupport::TestCase
   end
 
   test "Lengthening path sorts pagerefs appropriately" do
-    nyt1 = "http://www.nytimes.com/2015/08/24/business/economy/as-minimum-wage-rises-restaurants-say-no-to-tips-yes-to-higher-prices.html"
+    nyt1 = "https://www.theguardian.com/world/2022/jun/03/devastation-and-defiance-in-ukraine-100-days-of-a-war-that-is-reshaping-europe"
     dpr1 = PageRef.fetch nyt1
     dpr1.kind = 'about'
     dpr1.save
@@ -237,16 +237,16 @@ class SiteTest < ActiveSupport::TestCase
     assert_site_correctness shorter
 
     shorter.bkg_land
-    assert_equal "www.nytimes.com", shorter.root
+    assert_equal "www.theguardian.com", shorter.root
 
-    longer = Site.create(root: "www.nytimes.com/2015", home: nyt1)
+    longer = Site.create(root: "www.theguardian.com/world", home: nyt1)
     # Creating a site with a longer path attaches extant matching page_ref to it
     dpr1.reload
     longer.reload
     assert_page_ref_correctness dpr1, longer
     assert_site_correctness longer
 
-    nyt2 = "http://www.nytimes.com/2015/10/15/dining/danny-meyer-restaurants-no-tips.html"
+    nyt2 = "https://www.theguardian.com/world/video/2022/jun/02/russia-occupying-20-ukraine-territory-says-zelenskiy-video"
     dpr2 = PageRef.fetch nyt2
     assert_nil dpr2.id
     # New PageRef matching longer site gets the site
@@ -254,11 +254,11 @@ class SiteTest < ActiveSupport::TestCase
     dpr2.save
     assert_page_ref_correctness dpr2, longer
 
-    longer.root = "www.nytimes.com/2015/08"
+    longer.root = "www.theguardian.com/world/2022"
     longer.save
     # With one site now referring to a longer path, one pageref should retreat to the shorter path,
     # and the other should stay with the longer
-    assert_equal "www.nytimes.com/2015/08", longer.root
+    assert_equal "www.theguardian.com/world/2022", longer.root
     dpr1.reload
     assert_equal longer, dpr1.site
     dpr2.reload
@@ -311,11 +311,14 @@ class SiteTest < ActiveSupport::TestCase
                      "http://www.guardian.co.uk/lifeandstyle/2013/jan/06/nigel-slater-epiphany-cake-recipe")
   end
 
+=begin
+  NB: This test was built under the assumption that bladebla.com redirects to bladebla.cz, which
+  is not true (if it ever was)
   test "Home page has correct sample and site" do
     # bladebla.com redirects to bladebla.cz; this should be reflected in the site and its PageRef
     site = SiteServices.find_or_build_for "http://bladebla.com/esme"
     land_without_persistence site
-    assert_equal 2, site.page_ref.aliases.to_a.count
+    # assert_equal 2, site.page_ref.aliases.to_a.count
     site.page_ref.save
     refute site.page_ref.errors.any?, site.page_ref.errors.full_messages.join("\nand ")
     assert_equal 2, site.page_ref.aliases.count # Should have one for the original and one for the final url
@@ -331,6 +334,7 @@ class SiteTest < ActiveSupport::TestCase
     trapped_save site
     assert_equal site.page_ref, site2.page_ref # The two sites are aliases of one another
   end
+=end
 
 =begin
 NB: I don't <think> the slash/no-slash distinction still pertains
@@ -416,7 +420,7 @@ NB: I don't <think> the slash/no-slash distinction still pertains
     url = 'http://barbecuebible.com/recipe/grilled-venison-loin-with-honey-juniper-and-black-pepper-glaze/'
     site = SiteServices.find_or_build_for url
     assert_equal url, site.sample
-    assert_equal 'https://barbecuebible.com/', site.home
+    assert_equal 'http://barbecuebible.com', site.home
     assert_equal 'barbecuebible.com', site.root
     # Should have extracted info
     land_without_persistence site

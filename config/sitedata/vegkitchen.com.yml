@@ -4,7 +4,7 @@
 :trimmers: []
 :grammar_mods:
   :rp_inglist:
-    :in_css_match: ul.wprm-recipe-ingredients
+    :in_css_match: ul
   :rp_ingline:
     :in_css_match: li
   :rp_title:

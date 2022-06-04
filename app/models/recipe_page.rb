@@ -141,8 +141,7 @@ class RecipePage < ApplicationRecord
     # Degenerate case where the selection only has one node
     return anchor_node.to_html if anchor_node == focus_node
 
-    nokotree = assemble_tree_from_nodes anchor_node, focus_node, :tag => :div, :rp_elmt_class => :rp_recipe
-    nokotree.to_html if nokotree
+    assemble_tree_from_nodes(anchor_node, focus_node)&.to_html
   end
 
 end

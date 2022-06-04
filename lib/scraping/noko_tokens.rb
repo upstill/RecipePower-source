@@ -314,11 +314,11 @@ class NokoTokens < Array
       end
       while min < @bound && self[min].blank? do min += 1 end
       range = (max > min ? min..max : min...min)
-      results.push ((flag == :in_css_match) && block_given?) ?
+      results.push block_given? ?
                        yield(range, nokonode) :
                        range
     end
-    results
+    results.compact
   end
 
   # What are the tokens for encompassing the given subtree?

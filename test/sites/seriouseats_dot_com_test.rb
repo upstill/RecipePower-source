@@ -10,9 +10,9 @@ class SeriouseatsDotComTest < ActiveSupport::TestCase
 
   # Set up the parser, trimmers, selectors for the woks_of_life site
   def setup
-    @ingredients = %w{ eggplants Salt Cooking\ oil Sichuan\ chile\ bean\ paste
+    @ingredients = %w{ Salt Cooking\ oil Sichuan\ chile\ bean\ paste
       garlic ginger stock water superfine\ sugar Chinese\ light\ soy\ sauce potato\ starch
-      Chinkiang\ vinegar scallion\ greens water baking\ soda
+      Chinkiang\ vinegar scallion\ greens water 
      } # All ingredients found on the page
     @units =  %w{ g pound ounces tablespoons tablespoon teaspoons teaspoon ml } # All units
     @conditions = %w{ finely\ chopped hot thinly\ sliced cold } # All conditions
@@ -29,9 +29,11 @@ class SeriouseatsDotComTest < ActiveSupport::TestCase
 		}
 		@trimmers = ["div.nav-share", "div.pubmod-date", "figure", "div.author-byline"]
 		@selector = "div.article__container"
-    # @sample_url = 'http://www.seriouseats.com/recipes/2010/04/fish-fragrant-eggplant-recipe-fuchsia-dunlop.html'
     @sample_url = "http://www.seriouseats.com/creamy-braised-pork-and-bean-stew-cinnamon-fennel-and-onion-5217276"
-		@sample_title = 'Fish-Fragrant Eggplants (Sichuan Braised Eggplant With Garlic, Ginger, and Chiles) Recipe'
+		@sample_title = 'Creamy Braised Pork and Bean Stew With Cinnamon, Fennel, and Onion'
+
+    @sample_url = 'http://www.seriouseats.com/recipes/2010/04/fish-fragrant-eggplant-recipe-fuchsia-dunlop.html'
+    @sample_title = 'Fish-Fragrant Eggplants (Sichuan Braised Eggplant With Garlic, Ginger, and Chiles) Recipe'
 
     #@grammar_mods = {
     # :gm_inglist =>
@@ -61,8 +63,10 @@ class SeriouseatsDotComTest < ActiveSupport::TestCase
   end
 
   test 'ingredient line' do
-    html = "3 pounds (1.4kg) boneless pork butt"
-    pt_apply :rp_ingline, html: html, ingredients: %w{ boneless\ pork\ butt }, units: %w{ pounds kg }
+    string = "(1.4kg)"
+    pt_apply :rp_altamt, string: string, units: %w{ kg }
+    string = "3 pounds (1.4kg) boneless pork butt"
+    pt_apply :rp_ingline, string: string, ingredients: %w{ boneless\ pork\ butt }, units: %w{ pounds kg }
   end
 
   test 'ingredient list' do
@@ -137,13 +141,6 @@ EOF
   end
 
   test 'recipe loaded correctly' do
-    #rcp = `curl -k https://www.seriouseats.com/creamy-braised-pork-and-bean-stew-cinnamon-fennel-and-onion-5217276`
-    #pt_apply :rp_recipe, html: rcp
-=begin
-             ingredients: %w{ lemon\ zest lemon\ juice sourdough\ bread anchovy\ fillets },
-             conditions: %w{ crustless },
-             units: %w{ g }
-=end
     assert_not_empty @page, "No page url specified for ParseTester"
     pt_apply url: @page, ingredients: @ingredients, units: @units, conditions: @conditions
     # The ParseTester applies the setup parameters to the recipe

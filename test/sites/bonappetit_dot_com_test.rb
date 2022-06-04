@@ -67,11 +67,11 @@ class BonappetitDotComTest < ActiveSupport::TestCase
   end
 
   test 'ingredient lines' do
-    pt_apply :rp_ingline, html: "1 teaspoon finely grated lime zest", ingredients: 'lime zest', units: 'teaspoon', conditions: 'finely grated'
-    pt_apply :rp_ingline, html: "¼ cup fresh lime juice", ingredients: 'lime juice', units: 'cup', conditions: 'fresh'
-    pt_apply :rp_ingline, html: "2 cups torn frisee", ingredients: 'frisee', units: 'cups', conditions: 'torn'
-    pt_apply :rp_ingline, html: " Kosher salt, freshly ground pepper", ingredients: ['Kosher salt', 'freshly ground pepper']
-    pt_apply :rp_ingline, html: "2 cups 1-inch-wide strips lollo rosso lettuce or romaine ", ingredients: ['lollo rosso lettuce', 'romaine'], units: 'cups', conditions: '1-inch-wide strips'
+    pt_apply :rp_ingline, string: "1 teaspoon finely grated lime zest", ingredients: 'lime zest', units: 'teaspoon', conditions: 'finely grated'
+    pt_apply :rp_ingline, string: "¼ cup fresh lime juice", ingredients: 'lime juice', units: 'cup', conditions: 'fresh'
+    pt_apply :rp_ingline, string: "2 cups torn frisee", ingredients: 'frisee', units: 'cups', conditions: 'torn'
+    pt_apply :rp_ingline, string: " Kosher salt, freshly ground pepper", ingredients: ['Kosher salt', 'freshly ground pepper']
+    pt_apply :rp_ingline, string: "2 cups 1-inch-wide strips lollo rosso lettuce or romaine ", ingredients: ['lollo rosso lettuce', 'romaine'], units: 'cups', conditions: '1-inch-wide strips'
   end
 
   test 'recipes parsed out correctly' do

@@ -15,8 +15,7 @@ class MoodymixologistDotComTest < ActiveSupport::TestCase
     @conditions = %w{  } # All conditions
     # Grammar mods, css_selector and trimmers that apply to recipes
 		@grammar_mods = {
-        :gm_bundles => { :name => :wordpress },
-        :rp_title => { :in_css_match => 'h2.wprm-recipe-name' }
+        :gm_bundles => :wordpress
 		}
 		@trimmers = [
         "div.wprm-template-chic-buttons",

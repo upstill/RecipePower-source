@@ -68,11 +68,6 @@ lemon\ juice flat-leaf\ parsley cauliflower\ florets kosher\ salt } # All ingred
   end
 
   test 'recipe loaded correctly' do
-=begin
-             ingredients: %w{ lemon\ zest lemon\ juice sourdough\ bread anchovy\ fillets },
-             conditions: %w{ crustless },
-             units: %w{ g }
-=end
     assert_not_empty @page, "No page url specified for ParseTester"
     pt_apply url: @page, ingredients: @ingredients, units: @units, conditions: @conditions
     # The ParseTester applies the setup parameters to the recipe

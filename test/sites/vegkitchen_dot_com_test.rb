@@ -10,9 +10,11 @@ class VegkitchenDotComTest < ActiveSupport::TestCase
 
   # Set up the parser, trimmers, selectors for the woks_of_life site
   def setup
-    @ingredients = %w{  } # All ingredients found on the page
-    @units =  %w{  } # All units
-    @conditions = %w{  } # All conditions
+    @ingredients = %w{ light\ sesame\ oil toasted\ sesame\ oil soy\ sauce
+Chinese\ black\ vinegar balsamic\ vinegar dark\ brown\ sugar sea\ salt chili\ oil ginger garlic cilantro
+asparagus Asian\ rice\ noodles scallions sesame\ seeds } # All ingredients found on the page
+    @units =  %w{ pounds package ounce cup tablespoon tablespoons teaspoons  } # All units
+    @conditions = %w{ chopped minced } # All conditions
     # Grammar mods, css_selector and trimmers that apply to recipes
 		@grammar_mods = {
 			:rp_inglist => {
