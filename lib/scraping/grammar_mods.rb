@@ -78,9 +78,8 @@ module GrammarMods
                     :orlist => :predivide  # Divide the text up BEFORE passing to the ingredient line match
                 }
               when :paragraph
-                # grammar_mods[:rp_inglist] = { :in_css_match => selector_for('p', params ) }
-                if (selector = params[:paragraph_selector]).present?
-                  selector = selector_for('p', css_class: selector) unless selector.match /\bp\b[.#]/  # If the selector doesn't include the tag 'p', prepend it
+                if (selector = params[:paragraph_selector]&.strip).present?
+                  selector = selector_for('p', css_class: selector) unless selector.match /\s|^p\b[.#]/  # If the selector doesn't include the tag 'p', prepend it
                 else
                   selector = 'p'
                 end

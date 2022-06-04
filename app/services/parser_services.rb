@@ -180,7 +180,6 @@ class ParserServices
     parser.cache_init
     # parser.benchmarks_init
 
-    scanner.elmt_bounds.verify
     # Recipe parsing includes a Patternista scan of the document and integration of the results
     @parsed = (token == :rp_recipe) ?
                   parse_recipe( annotate: options[:annotate] ) :
@@ -188,7 +187,6 @@ class ParserServices
 
     # A little sugar: check ingredient line comments for stray ingredient specs
     if @parsed
-      scanner.elmt_bounds.verify
       @parsed.find(:rp_ing_comment).each do |comment|
         next if comment.result_stream.to_s.blank?
         # Scan the comments from ingredient lines for stray ingspecs
@@ -222,7 +220,6 @@ class ParserServices
 
     if @parsed&.success?
       if options[:annotate]
-        scanner.elmt_bounds.verify
         @parsed.enclose_all parser: parser
       end
       if Rails.env.test?

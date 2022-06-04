@@ -186,7 +186,7 @@ class ParseTester < ActiveSupport::TestCase
   def add_tags tagtype, names
     return unless names.present?
     typenum = Tag.typenum(tagtype)
-    names.each { |name|
+    [names].flatten.each { |name|
       # next if Tag.strmatch(name, tagtype: typenum).present?
       tag = Tag.assert name, typenum
       if @lexaur

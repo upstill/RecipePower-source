@@ -74,7 +74,12 @@ class CSSExtender
         handler ||= self.new
       else
         if op == '['
-          line.match /((.*)\])/
+          incr = 1
+          while !line.match(/((.*)\])/)
+            classes_and_operands[class_ix] << (line = classes_and_operands[class_ix + incr])
+            classes_and_operands[class_ix + incr] = nil
+            incr += 1
+          end
           to_replace, value = $1, $2
           if value.match /['"]?([^'"]*)['"]?/  # Elide quotes in the value
             value = $1

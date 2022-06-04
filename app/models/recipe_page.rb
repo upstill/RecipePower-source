@@ -76,7 +76,7 @@ class RecipePage < ApplicationRecord
 
         if Rails.env.test?
             if ps.parsed
-              puts "RecipePage found #{rcpdata.count} #{'recipes'.pluralize(rcpdata.count)}:"
+              puts "RecipePage found #{rcpdata.count} #{'recipe'.pluralize(rcpdata.count)}:"
               rcpdata.each { |rcpd| puts "\t#{rcpd[:title]}"}
             else
               puts "No recipes found on RecipePage"

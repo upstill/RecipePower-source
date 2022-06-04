@@ -261,13 +261,11 @@ class Seeker
     # Now we should modify the Nokogiri DOM to reflect the elements found
 
     result_stream.elmt_bounds.verify
-    # First, strip down lists and items to the bare minimum, the better to assemble the parts into :rp_elmt's
-    result_stream.elmt_bounds.verify
     # First, tag all Nokogiri elements that hit on an :in_css_match directive
     traverse do |inner|
       if inner.nokonode
         # The Seeker includes a Nokogiri element that defines its bounds b/c it hit an :in_css_match
-        inner.stamp_nokonode (parser&.tag_for_token(inner.token) || Parser.tag_for_token(inner.token))
+        inner.stamp_nokonode (parser&.tag_for_token(inner.token, node: inner.nokonode) || Parser.tag_for_token(inner.token, node: inner.nokonode))
       end
     end
     result_stream.elmt_bounds.verify
@@ -694,7 +692,7 @@ class AmountSeeker < Seeker
   def initialize stream, num, unit
     super stream, range: Seeker.bracket_children((num if num.is_a?(Seeker)), unit)
     @num = num
-    @unit = unit
+    @children = [@unit = unit]
     @token = :rp_amt
   end
 
@@ -705,17 +703,17 @@ class AmountSeeker < Seeker
     unit = nil
     num = NumberSeeker.match(stream, opts.slice(:report_on)) { |remainder|
       # A unit may follow the number within the same token
-      if unit = TagSeeker.match(StrScanner.new(remainder), opts.slice(:lexaur, :report_on).merge(types: 5))
+      if unit = TagSeeker.match(StrScanner.new(remainder), opts.slice(:lexaur, :report_on).merge(types: 5, token: :rp_unit_tag))
         unit.stream, unit.pos, unit.bound = stream, stream.pos, stream.pos+1
       end
     }
     if num
-      unit ||= TagSeeker.match num.tail_stream, opts.slice(:lexaur, :report_on).merge(types: 5)
+      unit ||= TagSeeker.match num.tail_stream, opts.slice(:lexaur, :report_on).merge(types: 5, token: :rp_unit_tag)
       return if opts[:full_only] && !unit
     elsif stream.peek&.match(/(^\d*\/{1}\d*$|^\d*[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]?)-?(\w*)/) &&
         (($1.present? && $2.present?) || !opts[:full_only])
       num = $1.if_present || '1'
-      unit = TagSeeker.match StrScanner.new($2), opts.slice(:lexaur, :report_on).merge(types: 5)
+      unit = TagSeeker.match StrScanner.new($2), opts.slice(:lexaur, :report_on).merge(types: 5, token: :rp_unit_tag)
       return unless unit
       unit.stream, unit.pos, unit.bound = stream, stream.pos, stream.pos+1
     else

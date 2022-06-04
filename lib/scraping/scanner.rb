@@ -282,6 +282,10 @@ class Scanner < Object
     []
   end
 
+  def nokonode
+    nil
+  end
+
   def method_missing name, *args
     x=2
   end

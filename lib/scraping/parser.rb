@@ -60,7 +60,7 @@ class Parser
   end
 
   # How should the token be enclosed?
-  def self.tag_for_token token
+  def self.tag_for_token token, node: nil
     case token.to_sym
     when :rp_recipelist, :rp_recipe, :rp_instructions, :rp_recipe_section # :rp_inglist, :rp_ingline
       'div'
@@ -75,7 +75,7 @@ class Parser
 
   # How should a successful match on the token be enclosed in the DOM?
   # There are defaults, but mainly it's also a function of the grammar, which is site-dependent
-  def tag_for_token token
+  def tag_for_token token, node: nil
     case token
     when :rp_inglist
       'ul'
@@ -84,11 +84,15 @@ class Parser
     else
       if (grammar_hash = @grammar[token.to_sym]).is_a? Hash
         if selector = grammar_hash[:in_css_match]
-          selector.split('.').first.if_present
+          # If the node ALREADY matches the selector, we return the node's name
+          # Unfortunately, this is apparently the only way to determine if a node matches a selector:
+          # search a NodeSet for the selector and check if the match is at the node
+          return node.name if Nokogiri::XML::NodeSet.new(node.document, [node]).at_css(selector) == node
+          selector.split(',').first.split('.').first.if_present
         elsif grammar_hash[:inline]
           'span'
         end
-      end || Parser.tag_for_token(token)
+      end || Parser.tag_for_token(token, node: node)
     end
   end
 

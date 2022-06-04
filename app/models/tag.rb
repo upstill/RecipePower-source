@@ -200,36 +200,20 @@ class Tag < ApplicationRecord
   end
 
   # Remove gratuitous characters, diacriticals, punctuation and capitalization for search purposes.
-  # Retain any terminating punctuation.
+  # Retain any terminating period.
   def self.normalize_name(str)
-    stripped = str.strip.sub /([.,'‘’“”'"]+)$/, ''
-    term = $1 || ''
-    term_plus = term.blank? ? '' : '-'+term
+    stripped = str.strip
+    term_plus = (stripped.last == '.') ? '-.' : ''
     stripped.gsub! /[.,'‘’“”'"]+/, ''
     case stripped.length
     when 0
-      term
+      '.'
     when 1
       stripped + term_plus
     else
       stripped.parameterize + term_plus
     end
   end
-
-=begin
-  def renormalize
-    new_normal = name.strip.gsub(/[.,'‘’“”'"]+/, '').parameterize.split('-').collect { |word| Stemmer.stem_word word }.join('-')
-    if new_normal != normalized_name
-      collisions = Tag.where(normalized_name: new_normal).to_a.keep_if { |t| t.id != id }
-      if collisions.present?
-        logger.debug "Tag ##{id} (#{name}) changes normalized_name '#{normalized_name}' to '#{new_normal}'"
-        reports = collisions.map { |coll| "'#{coll.name}' (#{coll.id})"}
-        logger.debug "...and it collides with: #{reports.join ', '}"
-        return self
-      end
-    end
-  end
-=end
 
   # Use this tag instead of 'other', i.e., absorb its taggings, referents, etc.
   # Either delete the other, or make it a synonym, according to 'delete'
@@ -405,7 +389,6 @@ class Tag < ApplicationRecord
       expressions.each { |expr| expressions.delete(expr) if expr.referent == ref }
     end
   end
-
 
   # Look up a tag by name, userid and type, creating a new one if needed
   # RETURNS: an array of matching tags (possibly empty if assert is not true)
