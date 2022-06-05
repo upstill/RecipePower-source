@@ -42,7 +42,8 @@ module GrammarMods
             grammar_mods[subkey] = mf
           end
           # Expand :gm_bundle meta-mod(s)
-          case mods_plus.delete(:gm_bundles)
+          bundle = mods_plus.delete(:gm_bundles)
+          case (bundle.is_a?(Hash) ? bundle[:name] : bundle)
           when :wordpress
             grammar_mods[:rp_instructions] = {:in_css_match => "ul.wprm-recipe-instructions"}
             grammar_mods[:rp_prep_time] = {:in_css_match => 'div.wprm-recipe-prep-time-container'}

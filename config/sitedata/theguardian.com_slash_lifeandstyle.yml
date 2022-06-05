@@ -11,6 +11,15 @@
     :in_css_match: h2
   :gm_inglist:
     :flavor: :paragraph
-    :selector: p.dcr-1qcirl4
+    :list_class: ''
+    :line_class: ''
+    :paragraph_selector:
+  :gm_bundles: :no_bundle
+  :rp_inglist:
+    :in_css_match:
+  :rp_ingline:
+    :in_css_match:
+  :rp_instructions:
+    :in_css_match:
 :sample_url: https://www.theguardian.com/lifeandstyle/2018/may/05/yotam-ottolenghi-asparagus-recipes
 :sample_title: Asparagus with pine nut and sourdough crumbs

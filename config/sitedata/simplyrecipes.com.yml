@@ -4,6 +4,7 @@
 :trimmers:
 - div.recipe-callout-buttons
 - p.dont-steal
+- div.structured-project__steps  ol li div.mntl-sc-block
 :grammar_mods:
   :triggers:
     :rp_author: Source
@@ -12,9 +13,19 @@
     - Yield
   :gm_inglist:
     :flavor: :unordered_list
-    :list_class: structured-ingredients__list
-    :line_class: structured-ingredients__list-item
+    :list_class: structured-ingredients__list, ingredient-list
+    :line_class: structured-ingredients__list-item, ingredient
+    :paragraph_selector: ''
   :rp_title:
     :in_css_match: h2.recipe-block__header
+  :gm_bundles: :no_bundle
+  :rp_inglist:
+    :in_css_match:
+  :rp_ingline:
+    :in_css_match:
+  :rp_paragraph:
+    :in_css_match:
+  :rp_instructions:
+    :in_css_match: div.structured-project__steps ol
 :sample_url: http://www.simplyrecipes.com/recipes/red_lentil_dal/
 :sample_title: Red Lentil Dal

@@ -146,16 +146,16 @@ namespace :sites do
     end
   end
 
-  # Record parsing data from sites in individual files, suitable for checkin
+  # Record parsing data from sites in config files, suitable for checkin
   # site => config/sitedata/<site.url>.yml for all sites that have Content (or one, as specified by :arg)
-  task :extract_parsing_data, [:arg] => :environment do  |t, args|
+  task :backup_parsing_data, [:arg] => :environment do  |t, args|
     # Derive an array of sites to process. If one is given in :arg, use that. Otherwise, go through all sites
     siteroot = args[:arg]
     sites = []
     if siteroot
       site = Site.find_by(root: siteroot) || Site.find_by(root: 'www.'+siteroot)
       raise "ERROR: there is no site with root #{siteroot}" if !site
-      puts "Save parsing data for Site##{site.id}, root '#{site.root}': '#{site.sample}'"
+      puts "Backup parsing data from database for Site##{site.id}, root '#{site.root}': '#{site.sample}'"
       sites << site
     end
     sites = Site.all if sites.empty?
@@ -189,10 +189,10 @@ namespace :sites do
   # Get parsing data for sites from YAML files
   # THIS SHOULD BE DONE AFTER A ROUND OF TESTING, IN PREPARATION FOR MOVING BETWEEN DEVELOPMENT AND PRODUCTION
   # config/sitedata/<url>.yml => Site.fetch(root: data[:root]) for *.yml
-  task :assert_parsing_data, [:arg] => :environment do |t, args|
+  task :restore_parsing_data, [:arg] => :environment do |t, args|
     sitename = args[:arg]
     for_configs(sitename) do |site, data|
-      puts "Restore parsing data for Site##{site.id}, root '#{site.root}': '#{site.sample}'"
+      puts "Restore parsing data to database for Site##{site.id}, root '#{site.root}': '#{site.sample}'"
       # Get default values from the file indicated by domain
       # Move the selector into a finder attached to the site
       if data[:selector]

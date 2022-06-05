@@ -3,7 +3,20 @@
 :selector: article.recipe-detail-card
 :trimmers:
 - div.nutrition-container
+- div.groceryListIndicatorMount
+- div#module-recipe-cooked
+- div#inline-recipe-newsletter-signup
+- div#privateNotesMount
+- div#floating-save-button-bottom-bound
+- section.desktop-ad
+- section.mobile-ad
+- section.tablet-ad
+- div#showMoreTopNote
 - div.secondary-controls
+- div#substitutionLinkMount
+- div#userNotesMount
+- div.recipe-detail-controls
+- div.recipe-metadata
 :grammar_mods:
   :rp_inglist:
     :in_css_match: ul.recipe-ingredients

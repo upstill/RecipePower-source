@@ -1,0 +1,19 @@
+---
+:root: theguardian.com
+:selector: div.article-body-commercial-selector
+:trimmers:
+- div.meta__extras
+- div.js-ad-slot
+- picture
+- figure[itemprop="associatedMedia image"]
+- div.submeta
+:grammar_mods:
+  :rp_inglist:
+    :in_css_match: p
+  :rp_title:
+    :in_css_match: h2
+  :rp_ingline:
+    :in_css_match:
+    :inline: true
+:sample_url: http://www.theguardian.com/profile/fuchsia-dunlop
+:sample_title: ''

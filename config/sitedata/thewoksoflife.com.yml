@@ -7,7 +7,8 @@
 - div.wprm-container-float-right
 - label.wprm-checkbox-label
 :grammar_mods:
-  :gm_bundles: :wordpress
+  :gm_bundles:
+    :name: :wordpress
   :rp_title:
     :in_css_match: h2
 :sample_url: https://thewoksoflife.com/simple-spicy-pan-fried-noodles/

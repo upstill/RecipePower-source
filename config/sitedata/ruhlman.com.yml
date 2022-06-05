@@ -3,7 +3,8 @@
 :selector: div.entry-content
 :trimmers: []
 :grammar_mods:
-  :gm_inglist: :unordered_list
+  :gm_inglist:
+    :flavor: :unordered_list
   :rp_instructions:
     :in_css_match:
 :sample_url: https://ruhlman.com/friday-cocktail-hour-the-vesper/

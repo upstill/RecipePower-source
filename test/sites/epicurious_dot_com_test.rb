@@ -59,16 +59,16 @@ div[data-testid=InstructionsWrapper]"
 	end
 
 	test 'ingredient list' do
-		html = '<div class="ingredient-group"><strong>Crust</strong><div class="gPuEKn"><div class="eftAc" itemprop="ingredients">1 1/2 cups all purpose flour</div><div class="eftAc" itemprop="ingredients">3 tablespoons sugar</div><div class="eftAc" itemprop="ingredients">1/4 teaspoon salt</div><div class="eftAc" itemprop="ingredients">1/2 cup (1 stick) chilled unsalted butter, cut into 1/2-inch cubes</div><div class="eftAc" itemprop="ingredients">2 tablespoons chilled whipping cream</div><div class="eftAc" itemprop="ingredients">1 large egg yolk</div></div></div>'
+		html = '<div class="ingredient-group"><strong>Crust</strong><div class="List-gPuEKn"><div class="Description-eftAc" itemprop="ingredients">1 1/2 cups all purpose flour</div><div class="Description-eftAc" itemprop="ingredients">3 tablespoons sugar</div><div class="Description-eftAc" itemprop="ingredients">1/4 teaspoon salt</div><div class="Description-eftAc" itemprop="ingredients">1/2 cup (1 stick) chilled unsalted butter, cut into 1/2-inch cubes</div><div class="Description-eftAc" itemprop="ingredients">2 tablespoons chilled whipping cream</div><div class="Description-eftAc" itemprop="ingredients">1 large egg yolk</div></div></div>'
 		pt_apply :rp_inglist, html: html
 
-		html = '<div class="ingredient-group"><strong>Filling</strong><div class="gPuEKn"><div class="eftAc" itemprop="ingredients">1/2 cup shelled natural unsalted pistachios (about 2 ounces)</div><div class="eftAc" itemprop="ingredients">1/2 cup slivered almonds (about 2 ounces)</div><div class="eftAc" itemprop="ingredients">1/2 cup sugar</div><div class="eftAc" itemprop="ingredients">1/2 cup (1 stick) chilled unsalted butter, cut into 1/2-inch cubes</div><div class="eftAc" itemprop="ingredients">1 large egg</div><div class="eftAc" itemprop="ingredients">1 teaspoon vanilla extract</div><div class="eftAc" itemprop="ingredients">1/2 teaspoon almond extract</div></div></div>'
+		html = '<div class="ingredient-group"><strong>Filling</strong><div class="List-gPuEKn"><div class="Description-eftAc" itemprop="ingredients">1/2 cup shelled natural unsalted pistachios (about 2 ounces)</div><div class="Description-eftAc" itemprop="ingredients">1/2 cup slivered almonds (about 2 ounces)</div><div class="Description-eftAc" itemprop="ingredients">1/2 cup sugar</div><div class="Description-eftAc" itemprop="ingredients">1/2 cup (1 stick) chilled unsalted butter, cut into 1/2-inch cubes</div><div class="Description-eftAc" itemprop="ingredients">1 large egg</div><div class="Description-eftAc" itemprop="ingredients">1 teaspoon vanilla extract</div><div class="Description-eftAc" itemprop="ingredients">1/2 teaspoon almond extract</div></div></div>'
 		pt_apply :rp_inglist, html: html
 
-		html = '<div class="ingredient-group"><div class="gPuEKn"><div class="eftAc" itemprop="ingredients">9 large apricots, halved, pitted</div></div></div>'
+		html = '<div class="ingredient-group"><div class="List-gPuEKn"><div class="Description-eftAc" itemprop="ingredients">9 large apricots, halved, pitted</div></div></div>'
 		pt_apply :rp_inglist, html: html
 
-		html = '<div class="ingredient-group"><strong>Glaze</strong><div class="gPuEKn"><div class="eftAc" itemprop="ingredients">1/3 cup apricot jam</div><div class="eftAc" itemprop="ingredients">2 teaspoons water</div><div class="eftAc" itemprop="ingredients">Chopped pistachios</div></div></div>'
+		html = '<div class="ingredient-group"><strong>Glaze</strong><div class="List-gPuEKn"><div class="Description-eftAc" itemprop="ingredients">1/3 cup apricot jam</div><div class="Description-eftAc" itemprop="ingredients">2 teaspoons water</div><div class="Description-eftAc" itemprop="ingredients">Chopped pistachios</div></div></div>'
 		pt_apply :rp_inglist, html: html
 	end
 

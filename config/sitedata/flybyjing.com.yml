@@ -6,7 +6,8 @@
 - div.colorful__teeth
 - picture
 :grammar_mods:
-  :gm_inglist: :paragraph
+  :gm_inglist:
+    :flavor: :paragraph
   :rp_title:
     :in_css_match: h1,h2
   :rp_instructions:

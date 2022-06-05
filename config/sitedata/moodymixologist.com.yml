@@ -14,5 +14,16 @@
   :gm_bundles: :wordpress
   :rp_title:
     :in_css_match: h2.wprm-recipe-name
+  :gm_inglist:
+    :flavor: :unordered_list
+    :list_class: ''
+    :line_class: ''
+    :paragraph_selector: ''
+  :rp_inglist:
+    :in_css_match:
+  :rp_ingline:
+    :in_css_match:
+  :rp_instructions:
+    :in_css_match:
 :sample_url: https://www.moodymixologist.com/blog/the-saturn-a-tiki-cocktail-with-gin
 :sample_title: The Saturn – Gin Tiki Cocktail

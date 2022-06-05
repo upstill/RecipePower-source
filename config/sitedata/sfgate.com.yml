@@ -1,5 +1,5 @@
 ---
-:root: sfchronicle.com
+:root: sfgate.com
 :selector: article.article--content
 :trimmers:
 - section.relatedStories
@@ -11,4 +11,4 @@
   :rp_title:
     :in_css_match: div.recipe h3
 :sample_url: http://www.sfchronicle.com/recipes/article/Preserving-tradition-with-DIY-tofu-4615283.php
-:sample_title: Homemade Block Tofu
+:sample_title: ''

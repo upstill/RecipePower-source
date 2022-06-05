@@ -22,11 +22,18 @@
 :grammar_mods:
   :gm_inglist:
     :flavor: :unordered_list
-    :list_class: structured-ingredients__list
-    :line_class: structured-ingredients__list-item
+    :list_class: structured-ingredients__list, ingredient-list
+    :line_class: structured-ingredients__list-item, ingredient
   :rp_title:
     :in_css_match: h1
   :rp_instructions:
     :in_css_match: div.structured-project__steps ol
+  :rp_inglist:
+    :in_css_match:
+  :rp_ingline:
+    :in_css_match:
+  :gm_bundles: :no_bundle
+  :rp_paragraph:
+    :in_css_match:
 :sample_url: https://www.thespruceeats.com/roasted-cauliflower-with-parmesan-cheese-3052530
 :sample_title: Parmesan-Roasted Cauliflower

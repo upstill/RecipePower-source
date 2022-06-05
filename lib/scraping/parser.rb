@@ -84,10 +84,11 @@ class Parser
     else
       if (grammar_hash = @grammar[token.to_sym]).is_a? Hash
         if selector = grammar_hash[:in_css_match]
+          selectors = CSSExtender.args(selector) # Convert to take advantage of our extensions
           # If the node ALREADY matches the selector, we return the node's name
           # Unfortunately, this is apparently the only way to determine if a node matches a selector:
           # search a NodeSet for the selector and check if the match is at the node
-          return node.name if node && (Nokogiri::XML::NodeSet.new(node.document, [node]).at_css(selector) == node)
+          return node.name if node && (Nokogiri::XML::NodeSet.new(node.document, [node]).at_css(*selectors) == node)
           selector.split(',').first.split('.').first.if_present
         elsif grammar_hash[:inline]
           'span'

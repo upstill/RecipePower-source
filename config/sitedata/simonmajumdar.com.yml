@@ -5,6 +5,7 @@
 :grammar_mods:
   :rp_title:
     :in_css_match: div#comp-inhsovx8 h1
-  :gm_inglist: :unordered_list
+  :gm_inglist:
+    :flavor: :unordered_list
 :sample_url: https://www.simonmajumdar.com/fiery-hot-lime-pickle
 :sample_title: Fiery Hot Lime Pickle
