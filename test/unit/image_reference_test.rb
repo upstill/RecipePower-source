@@ -9,7 +9,7 @@ class ImageReferenceTest < ActiveSupport::TestCase
   end
 
   test 'image reference gets joined properly' do
-    site = SiteServices.find_or_build_for 'http://www.dailybitesblog.com/'
+    site = Site.find_or_build_for 'http://www.dailybitesblog.com/'
     refute site.dj
     site.ensure_attributes
     assert site.good?

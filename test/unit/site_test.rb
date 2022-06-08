@@ -54,14 +54,14 @@ class SiteTest < ActiveSupport::TestCase
   end
 
   test "site initialized to home" do
-    site = SiteServices.find_or_build 'http://mexicocooks.typepad.com/mexico_cooks', root: 'mexicocooks.typepad.com/mexico_cooks'
+    site = Site.find_or_build 'http://mexicocooks.typepad.com/mexico_cooks', root: 'mexicocooks.typepad.com/mexico_cooks'
     land_with_persistence site
     assert_equal 'mexicocooks.typepad.com/mexico_cooks', site.root
     assert_not_nil site.page_ref
   end
 
   test "site created with no home, then set" do
-    site = SiteServices.find_or_build 'https://mexicocooks.typepad.com/mexico_cooks', root: 'mexicocooks.typepad.com/mexico_cooks'
+    site = Site.find_or_build 'https://mexicocooks.typepad.com/mexico_cooks', root: 'mexicocooks.typepad.com/mexico_cooks'
     land_with_persistence site
     unless site.respond_to?(:reference)
       assert_equal 'https://mexicocooks.typepad.com/mexico_cooks', site.home.sub(/\/$/, '')
@@ -72,9 +72,9 @@ class SiteTest < ActiveSupport::TestCase
   test "Same sample maps to same site" do
     alcasample = "http://www.alcademics.com/2012/04/a-brilliant-idea-that-didnt-quite-work.html?utm_source=feedburner&utm_medium=feed&utm_campaign=Feed%3A+Alcademics+%28alcademics.com%29"
 
-    site1 = SiteServices.find_or_build_for alcasample
+    site1 = Site.find_or_build_for alcasample
     land_with_persistence site1
-    site2 = SiteServices.find_or_build_for alcasample
+    site2 = Site.find_or_build_for alcasample
     land_with_persistence site2
     assert_equal site1, site2, "Same sample creates different sites"
   end
@@ -82,7 +82,7 @@ class SiteTest < ActiveSupport::TestCase
   test "root reassignment for site works" do
     alcasample = "http://www.alcademics.com/2012/04/a-brilliant-idea-that-didnt-quite-work.html?utm_source=feedburner&utm_medium=feed&utm_campaign=Feed%3A+Alcademics+%28alcademics.com%29"
 
-    site1 = SiteServices.find_or_build_for alcasample
+    site1 = Site.find_or_build_for alcasample
     land_with_persistence site1
     assert_equal 'www.alcademics.com', site1.root
     site1.root = 'www.alcademics.com/2012'
@@ -117,7 +117,7 @@ class SiteTest < ActiveSupport::TestCase
 
   test "site handles multiple pageref types" do
     alcasample = "http://www.alcademics.com/2012/04/a-brilliant-idea-that-didnt-quite-work.html?utm_source=feedburner&utm_medium=feed&utm_campaign=Feed%3A+Alcademics+%28alcademics.com%29"
-    site = SiteServices.find_or_build_for alcasample
+    site = Site.find_or_build_for alcasample
     site.ensure_attributes
     dpr = PageRef.fetch alcasample
     dpr.kind = 'about'
@@ -135,7 +135,7 @@ class SiteTest < ActiveSupport::TestCase
   end
 
   test "with_subroot_of" do
-    nyt = SiteServices.find_or_build_for "https://dinersjournal.blogs.nytimes.com/author/melissa-clark/" # sites(:nyt).save # Trigger DelayedJob
+    nyt = Site.find_or_build_for "https://dinersjournal.blogs.nytimes.com/author/melissa-clark/" # sites(:nyt).save # Trigger DelayedJob
     nyt.save
     assert_not_nil nyt.dj, 'Existing site not marked for gleaning'
     nyt1 = "http://dinersjournal.blogs.nytimes.com/2012/03/23/yeasted-dough-for-a-rustic-tart/?partner=rss&emc=rss"
@@ -267,11 +267,11 @@ class SiteTest < ActiveSupport::TestCase
 
   test "Different samples from one site map to same site" do
     alcasample = "http://www.alcademics.com/2012/04/a-brilliant-idea-that-didnt-quite-work.html?utm_source=feedburner&utm_medium=feed&utm_campaign=Feed%3A+Alcademics+%28alcademics.com%29"
-    site1 = SiteServices.find_or_build_for(alcasample)
+    site1 = Site.find_or_build_for(alcasample)
     land_with_persistence site1
 
     alcasample = "http://www.alcademics.com/2012/04/the-golden-gate-75-cocktail-.html?utm_source=feedburner&utm_medium=feed&utm_campaign=Feed%3A+Alcademics+%28alcademics.com%29"
-    site2 = SiteServices.find_or_build_for(alcasample)
+    site2 = Site.find_or_build_for(alcasample)
     land_with_persistence site2
 
     assert_equal site1, site2, "Different samples from one site creates different sites"
@@ -316,7 +316,7 @@ class SiteTest < ActiveSupport::TestCase
   is not true (if it ever was)
   test "Home page has correct sample and site" do
     # bladebla.com redirects to bladebla.cz; this should be reflected in the site and its PageRef
-    site = SiteServices.find_or_build_for "http://bladebla.com/esme"
+    site = Site.find_or_build_for "http://bladebla.com/esme"
     land_without_persistence site
     # assert_equal 2, site.page_ref.aliases.to_a.count
     site.page_ref.save
@@ -327,9 +327,9 @@ class SiteTest < ActiveSupport::TestCase
     assert_equal 'bladebla.com', site.root
     assert_equal 'bladebla.cz', site.page_ref.site.root
 
-    site2 = SiteServices.find_or_build_for "https://bladebla.cz"
+    site2 = Site.find_or_build_for "https://bladebla.cz"
     assert_equal site.page_ref.site, site2
-    site = SiteServices.find_or_build_for "http://bladebla.com"
+    site = Site.find_or_build_for "http://bladebla.com"
     site.ensure_attributes [ :name, :logo ]
     trapped_save site
     assert_equal site.page_ref, site2.page_ref # The two sites are aliases of one another
@@ -339,7 +339,7 @@ class SiteTest < ActiveSupport::TestCase
 =begin
 NB: I don't <think> the slash/no-slash distinction still pertains
   test "differentiate between different paths" do
-    short = SiteServices.find_or_build_for "http://www.esquire.com/food-drink/index.html"
+    short = Site.find_or_build_for "http://www.esquire.com/food-drink/index.html"
     # Should now have two references, the canonical one without the slash, and a second one with
     assert_equal "http://www.esquire.com/", short.home
     assert short.page_ref
@@ -357,7 +357,7 @@ NB: I don't <think> the slash/no-slash distinction still pertains
 =end
 
   test "reset the home path and root independently" do
-    site = SiteServices.find_or_build_for "http://www.esquire.com/food-drink/index.html"
+    site = Site.find_or_build_for "http://www.esquire.com/food-drink/index.html"
     land_without_persistence site
     # Should now have two references, the canonical one without the slash, and a second one with
     assert_equal "https://www.esquire.com", site.home.sub(/\/$/, '')
@@ -378,7 +378,7 @@ NB: I don't <think> the slash/no-slash distinction still pertains
 
   test "associations" do
     site_count = Site.count
-    site = SiteServices.find_or_build_for "http://www.esquire.com/food-drink/"
+    site = Site.find_or_build_for "http://www.esquire.com/food-drink/"
     trapped_save site 
     assert site.name_needed
     assert site.logo_needed
@@ -418,7 +418,7 @@ NB: I don't <think> the slash/no-slash distinction still pertains
 
   test "site gleaning" do
     url = 'http://barbecuebible.com/recipe/grilled-venison-loin-with-honey-juniper-and-black-pepper-glaze/'
-    site = SiteServices.find_or_build_for url
+    site = Site.find_or_build_for url
     assert_equal url, site.sample
     assert_equal 'http://barbecuebible.com', site.home
     assert_equal 'barbecuebible.com', site.root

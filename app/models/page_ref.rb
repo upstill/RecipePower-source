@@ -334,7 +334,7 @@ class PageRef < ApplicationRecord
     # We do NOT build the associated site here, because we may be BUILDING the page_ref for a site, in
     # which case that site will assign itself to us. Instead, the site attribute is memoized, and if it
     # hasn't been built by the time that it is accessed, THEN we find or build an appropriate site
-    # self.site = SiteServices.find_or_build_for self
+    # self.site = Site.find_or_build_for self
     # self.kind = :site if site&.page_ref == self # Site may have failed to build
     # We trigger the site-adoption process if the existing site doesn't serve the new url
     # self.site = nil if site&.persisted? && (SiteServices.find_for(url) != site) # Gonna have to find another site
@@ -398,7 +398,7 @@ class PageRef < ApplicationRecord
     write_attribute :url, new_url
     alias_for url, true # Ensure the presence of an alias
     if http_status == 200 # If status is okay, start building the site
-      self.site = SiteServices.find_or_build_for self
+      self.site = Site.find_or_build_for self
       self.kind = :site if site&.page_ref == self # Site may have failed to build
       # When getting the url and status from gleaning or mercury_result, we assume that others will launch for attributes as needed
       refresh_attributes([:picurl, :title], restart: true) if associate_or_twofer.is_a?(Array)
@@ -462,7 +462,7 @@ class PageRef < ApplicationRecord
       self.url_needed = self.http_status_needed = false # Close url and status even if not acquired from associate
     end
     if http_status == 200
-      self.site = SiteServices.find_or_build_for self
+      self.site = Site.find_or_build_for self
       self.kind = :site if site&.page_ref == self # Site may have failed to build
     end
     if Rails.env.test?

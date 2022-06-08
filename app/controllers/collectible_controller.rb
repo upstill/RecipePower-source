@@ -404,7 +404,7 @@ class CollectibleController < ApplicationController
             # We use the initial title for now, until the extractions come in
             page_ref.save # Persist the record, triggering analysis in background
             if page_ref.errors.present?
-              msg = page_ref.errors.messages.gsub /\"/, '\''
+              msg = page_ref.errors.full_messages.first.gsub /\"/, '\''
               render js: %Q{alert("Sorry, but RecipePower can't make sense of this URL (#{msg})") ; }
             else
               # sourcehome is essential for communicating between the embedded Javascript and the editing iframe

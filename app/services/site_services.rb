@@ -5,8 +5,9 @@ class SiteServices
     @site = site
   end
 
+=begin
   # Return a site (if any) that serves for the given link
-  def self.find_for link
+  def self.find_for_url link
     return nil unless links = subpaths(link) # URL doesn't parse
     scope = Site.where root: links # Scope for all sites whose root matches a subpath of the url...
     # ...scan for the one with the longest root
@@ -21,7 +22,7 @@ class SiteServices
   def self.find_or_build_for url_or_page_ref
     link = url_or_page_ref.is_a?(PageRef) ? url_or_page_ref.url : url_or_page_ref
     # Look first for existing sites on any of the links
-    if site = SiteServices.find_for(link)
+    if site = Site.find_for_url(link)
       return site
     end
 
@@ -49,7 +50,7 @@ class SiteServices
     end
     if options[:root] ||= cleanpath(homelink) # URL parses
       # Find a site, if any, based on the longest subpath of the URL
-      if site = SiteServices.find_by_root(options[:root])
+      if site = Site.find_by_root(options[:root])
         return site # Can be found? Great!
       end
       # The home link needs to take heed of the root, since the latter may have a longer path
@@ -76,6 +77,7 @@ class SiteServices
       f.save if f.content_selector_changed?
     end
   end
+=end
 
   # Evaluate the site's suitability for deletion
   def nuke_message button
@@ -89,6 +91,7 @@ class SiteServices
     end
   end
   
+=begin
   # Used twice in sites.rake
   def fix_root
     new_root =
@@ -114,6 +117,7 @@ class SiteServices
     end
     return report
   end
+=end
 
   public
 
@@ -174,12 +178,12 @@ class SiteServices
     end
   end
 
+=begin
   def get_input(prompt='? ')
     print prompt
     gets.strip
   end
 
-=begin
   # Return the set of finders that apply to the site (those assigned to the site, then global ones)
   def all_finders
     # Give the DefaultFinders and CandidateFinders a unique, site-less finder from the database
@@ -303,7 +307,6 @@ class SiteServices
     end
     extractions
   end
-=end
 
   # Study a sample of every site for its response to extractions, summarizing the results
   # for every extraction strategy.
@@ -366,7 +369,6 @@ class SiteServices
     end
   end
 
-=begin
   # Return the raw mapping from finders to arrays of hits
   def gleaning_results url, finders=nil
     PageTags.new(url, finders || FinderServices.applicable(@site), true, true).results
@@ -460,35 +462,6 @@ class SiteServices
         where("page_refs.domain = '#{site.page_ref.domain}'").
         uniq.
         to_a
-  end
-
-  private
-
-  # In #find_or_build sometimes we need to find a site that has been priorly built but not yet persisted.
-  # To make these as yet unpersisted sites findable, we keep a cache of unpersisted sites (the
-  # hash @@UNPERSISTED, keyed on the root attribute).
-
-  # Get the Site of the given root, including a search among unpersisted records
-  def self.find_by_root root
-    #SiteServices.unpersisted.find { |up| up.root == root } || Site.find_by(root: root)
-    self.unpersisted[root] || Site.find_by(root: root)
-  end
-
-  def self.unpersisted
-    (@@UNPERSISTED ||= {}).keep_if { |root, site| !site.persisted? }
-  end
-
-  def self.clear_unpersisted
-    @@UNPERSISTED = {}
-  end
-
-  # Build a new Site and add it to the unpersisted set
-  def self.build_site options = {}
-    # We need to get the site into the unpersisted table immediately, because
-    # setting :home may create a page_ref, which may create another site
-    self.unpersisted[options[:root]] = (site = Site.new root: options[:root])
-    options.except(:root).each { |attr, val| site.send :"#{attr}=", val }
-    site
   end
 
 end

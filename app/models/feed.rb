@@ -18,7 +18,7 @@ class Feed < ApplicationRecord
   # fields (title, description...), and ensure it has an associated site
   before_validation { |feed|
     if feed.home_changed? && cleanpath(feed.home).present?
-      feed.site = Site.find_or_initialize feed.home
+      feed.site = Site.find_or_build_for feed.home
     end
     if (feed.new_record? && feed.url.present?) || feed.url_changed?
       feed.follow_url
@@ -77,7 +77,7 @@ class Feed < ApplicationRecord
     if fetch
       self.title = (@fetched.title || '').truncate(255)
       self.description = (@fetched.description || '').truncate(255)
-      self.site ||= SiteServices.find_or_build_for url
+      self.site ||= Site.find_or_build_for url
       unless @fetched.feed_url.blank? || (url == @fetched.feed_url)
         # When the URL changes, clear and update the feed entries
         self.url = @fetched.feed_url

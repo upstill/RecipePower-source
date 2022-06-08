@@ -18,6 +18,6 @@ class ActiveSupport::TestCase
 
   def setup
     ImageReferenceServices.clear_unpersisted
-    SiteServices.clear_unpersisted
+    Site.clear_unpersisted
   end
 end

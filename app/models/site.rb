@@ -278,23 +278,18 @@ class Site < ApplicationRecord
     page_refs.where.not id: page_ref_id
   end
 
-  # site: root of the domain (i.e., protocol + domain); suitable for pattern-matching on a reference URL to glean a set of matching Sites
-  # subsite: a path relative to the domain which differentiates among Sites with the same domain (site attribute)
-  # home: where the nominal site lives. This MAY be (site+subsite), but in cases of indirection, it may be an entirely
-  #      different domain. (See Splendid Table on publicradio.org redirect to splendidtable.org)
-  # So, (site+sample) and (site+subsite) should be valid links, but not necessarily (home+sample), since redirection
-  #      may alter the path
-  # Also, in most cases, site==home (when the domain is home, i.e. subsite is empty); in others, (site+subsite)==home,
+  # root: root of the domain (i.e., protocol + domain); suitable for pattern-matching on a reference URL
+  #      to glean a set of matching Sites
+  # home: where the nominal site lives (found in the Site's PageRef). Normally, home is an extension of root,
+  #      but in cases of indirection, it may be an entirely different domain.
+  # sample: a link to a sample page from the site; in view of redirection, may not be related to root or home
+  # NB: in most cases, root==home (when the domain is home, i.e. subsite is empty); in others, (root+subsite)==home,
   #     and only rarely will home be different from either of those
   # attr_accessible :finders_attributes, :oldname, :ttlcut, :finders, :approved, :approved_feeds_count, :feeds_count,
                   # :description, :reference, :references, :name, :page_ref_attributes
 
   # For reassigning the kind of the page_ref
   accepts_nested_attributes_for :page_ref
-
-  # accepts_nested_attributes_for :grammar_fields
-
-  # attr_accessible :sample, :root
 
   if Rails::VERSION::STRING[0].to_i < 5
     belongs_to :referent, class_name: 'SourceReferent' # See before_destroy method, :dependent=>:destroy
@@ -363,7 +358,7 @@ class Site < ApplicationRecord
     # Reassign all of our pagerefs as necessary
     if saved_change_to_root? # Root has changed
       page_refs.each do |pr|
-        if (newsite = SiteServices.find_for pr.url) != pr.site
+        if (newsite = Site.find_for_url pr.url) != pr.site
           page_refs.delete pr
           newsite.page_refs << pr
         end
@@ -490,7 +485,6 @@ public
     onscope = block_given? ? yield() : self.unscoped
     a1 = [
         onscope.where(%q{"sites"."description" ILIKE ?}, matcher),
-        # onscope.where(%q{"sites"."root" ILIKE ?}, matcher)
     ]
     a2 = PageRef.strscopes(matcher) { |inward=nil|
       joinspec = inward ? {:page_ref => inward} : :page_ref
@@ -540,6 +534,62 @@ public
     Site.where(root: paths).to_a.max_by { |s| s.root.length }
   end
 
+  # Return a site (if any) that serves for the given link
+  def self.find_for_url link
+    return nil unless links = subpaths(link) # URL doesn't parse
+    site_scope = Site.where root: links # Scope for all sites whose root matches a subpath of the url...
+    # ...scan for the one with the longest root
+    set = site_scope.to_a +
+        Alias.includes(:page_ref).where(url: links).to_a.keep_if { |al| al.page_ref.kind == 'site' } +
+        Site.unpersisted.values.find_all { |s| links.include? s.root }
+    out = set.max { |e1, e2| (e1.is_a?(Site) ? e1.root : e1.url).length <=> (e2.is_a?(Site) ? e2.root : e2.url).length }
+    (out.is_a?(Alias) ? out.page_ref.site : out) if out
+  end
+
+  # Produce a Site that maps to a given url(s) whether one already exists or not
+  def self.find_or_build_for url_or_page_ref
+    link = url_or_page_ref.is_a?(PageRef) ? url_or_page_ref.url : url_or_page_ref
+    # Look first for existing sites on any of the links
+    if site = Site.find_for_url(link)
+      return site
+    end
+
+    if inlinks = subpaths(link)
+      return Site.find_or_build url_or_page_ref, root: inlinks.first, sample: link
+    end
+    Site.find_or_build url_or_page_ref, sample: link
+  end
+
+  # Produce a Site for a given url(s) whether one already exists or not
+  def self.find_or_build url_or_page_ref, options={}
+    # If a PageRef is provided, and it bears the homelink, use that for our PageRef
+    # to avoid an infinite regress of Site deriving PageRef deriving Site...
+    if url_or_page_ref.is_a?(PageRef)
+      homelink = host_url (options[:sample] ||= url_or_page_ref.url)
+      if Alias.urleq(homelink, url_or_page_ref.url)
+        options[:page_ref] = url_or_page_ref
+      else
+        options[:home] = homelink
+      end
+    else
+      homelink = host_url (options[:sample] ||= url_or_page_ref)
+      options[:home] = homelink
+    end
+    if options[:root] ||= cleanpath(homelink) # URL parses
+      # Find a site, if any, based on the longest subpath of the URL
+      if site = Site.find_by_root(options[:root])
+        return site # Can be found? Great!
+      end
+      # The home link needs to take heed of the root, since the latter may have a longer path
+      if options[:home] && options[:root]&.match('/') # The root includes a path, so add it to :home
+        options[:home] = safe_uri_join(options[:home], options[:root].sub(/[^\/]*\//, '')).to_s
+      end
+      # Need to make a new one. We'll leave this up to PageRef, which will do the actual work
+      # of creating the site while managing indirects
+      self.build_site options
+    end
+  end
+
   # do qa when reassigning root
   def root= new_root
     new_root.sub!(/\/$/, '')
@@ -562,23 +612,13 @@ public
       # ...but the shorter version may still attract others
       unless Site.with_subroot_of(old_root) # A site that <could> take all pagerefs as needed
         orphans = dependent_page_refs.joins(:aliases).where.not(Alias.url_path_query new_root).pluck :url
-        unless orphans.keep_if { |url| !(s = SiteServices.find_for(url)) || (s.id == id) }.empty?
+        unless orphans.keep_if { |url| !(s = Site.find_for_url(url)) || (s.id == id) }.empty?
           # The new root is neither a substring nor a superstring of the existing root.
           # Since we've already established that there's no Site to catch the existing entities, we fail
           errors.add(:root, "would abandon #{orphans.count} out of #{dependent_page_refs.count} existing entities")
           return
         end
       end
-=begin
-  ## This is now part of after_save procedure so corrected page_refs have a
-    else
-      if osite = Site.with_subroot_of(new_root)
-        osite.page_refs.where('url ILIKE ?', "%#{new_root}").not(id: page_ref_id).each do |newref|
-          # Move refs that match new root from old site to here
-          osite.page
-        end
-      end
-=end
     end
     super
   end
@@ -594,16 +634,6 @@ public
 
   def home
     page_ref&.url || "http://#{self[:root]}"
-  end
-
-  # Produce a Site for a given url(s) whether one already exists or not,
-  # WITHOUT SAVING IT
-  def self.find_or_initialize homelink, options={}
-    if uri = options[:root] || cleanpath(homelink) # URL parses
-      # Find a site, if any, based on the longest subpath of the URL
-      Site.find_by(root: uri) ||
-      Site.new( { sample: homelink }.merge(options).merge(root: uri, home: homelink) )
-    end
   end
 
   def domain
@@ -624,5 +654,32 @@ public
   end
 
   private
+
+  # In #find_or_build sometimes we need to find a site that has been priorly built but not yet persisted.
+  # To make these as yet unpersisted sites findable, we keep a cache of unpersisted sites (the
+  # hash @@UNPERSISTED, keyed on the root attribute).
+
+  # Build a new Site and add it to the unpersisted set
+  def self.build_site options = {}
+    # We need to get the site into the unpersisted table immediately, because
+    # setting :home may create a page_ref, which may create another site
+    self.unpersisted[options[:root]] = (site = Site.new root: options[:root])
+    options.except(:root).each { |attr, val| site.send :"#{attr}=", val }
+    site
+  end
+
+  # Get the Site of the given root, including a search among unpersisted records
+  def self.find_by_root root
+    #SiteServices.unpersisted.find { |up| up.root == root } || Site.find_by(root: root)
+    self.unpersisted[root] || Site.find_by(root: root)
+  end
+
+  def self.unpersisted
+    (@@UNPERSISTED ||= {}).keep_if { |root, site| !site.persisted? }
+  end
+
+  def self.clear_unpersisted
+    @@UNPERSISTED = {}
+  end
 
 end

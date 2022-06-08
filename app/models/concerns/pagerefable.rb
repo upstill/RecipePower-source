@@ -146,7 +146,7 @@ module Pagerefable
   end
 
   def ensure_site
-    (page_ref.site ||= SiteServices.find_or_build_for(page_ref)) if page_ref
+    (page_ref.site ||= Site.find_or_build_for(page_ref)) if page_ref
   end
 
   def url_attribute
