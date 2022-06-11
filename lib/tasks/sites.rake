@@ -174,6 +174,7 @@ namespace :sites do
           grammar_mods: site.grammar_mods
       }.compact
       next if data.blank?
+      puts "...backing up Site##{site.id} of root '#{site.root}' as '#{data[:root]}'"
       # Get the sample for the site and its title from the config file, if any
       for_configs(site) do |site, config_data|
         data[:sample_url] = config_data[:sample_url]
