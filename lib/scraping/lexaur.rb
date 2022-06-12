@@ -104,7 +104,9 @@ class Lexaur < Object
       }, skipper: skipper
     end
     # Return the result for extension purposes, only if the sequel passes muster
-    return result if result.report { |data, stream_start, stream_end| reporter.call data, stream_start, stream_end, operand if data }
+    return result if result.report do |data, stream_start, stream_end|
+      reporter.call data, stream_start, stream_end, operand if data
+    end
   end
 
   # Consume tokens from the stream and walk down the Lexaur tree.

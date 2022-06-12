@@ -25,8 +25,8 @@ class ThespruceeatsDotComTest < ActiveSupport::TestCase
 		}
 		@trimmers = ["ul.tag-nav__list", "ul.social-nav__list", "div.figure__media", "div.aggregate-star-rating", "figure", "div.section-header", "div.nutrition-info", "div.decision-block__feedback", "div.article-header__media", "div.mntl-bio-tooltip__bottom", "div.mntl-bio-tooltip__top", "div.article-updated-date", "div.feedback-block", "div.inline-block", "div.inline-video", "div.featured-link", "div.sources"]
 		@selector = "article.article div.l-container"
-		@sample_url = 'https://www.thespruceeats.com/roasted-cauliflower-with-parmesan-cheese-3052530'
-		@sample_title = 'Parmesan-Roasted Cauliflower'
+    @sample_url = 'https://www.thespruceeats.com/roasted-cauliflower-with-parmesan-cheese-3052530'
+    @sample_title = 'Parmesan-Roasted Cauliflower'
 
     #@grammar_mods = {
     # :gm_inglist =>
@@ -56,6 +56,24 @@ class ThespruceeatsDotComTest < ActiveSupport::TestCase
   end
 
   test 'ingredient list' do
+    add_tags(Tag.typenum(:Ingredient), %w{ rum vermouth juice})
+    html =<<EOF
+<div> Irrelevant div
+<span> Some random crap prior
+<ul class="structured-ingredients__list text-passage">
+<li class="structured-ingredients__list-item">
+<p><span data-ingredient-quantity="true">1 1/2</span> <span data-ingredient-unit="true">ounces</span> <a href="https://www.thespruceeats.com/introduction-to-rum-760702" data-component="link" data-source="inlineLink" data-type="internalLink" data-ordinal="1"><span data-ingredient-name="true">dark rum</span></a></p>
+</li>
+<li class="structured-ingredients__list-item">
+<p><span data-ingredient-quantity="true">1 1/2</span> <span data-ingredient-unit="true">ounces</span> <span data-ingredient-name="true">dry vermouth</span></p>
+</li>
+<li class="structured-ingredients__list-item">
+<p><span data-ingredient-quantity="true">1 1/2</span> <span data-ingredient-unit="true">ounces</span> <span data-ingredient-name="true">pineapple juice</span></p>
+</li>
+</ul>
+</div>
+EOF
+    pt_apply :rp_inglist, html: html, ingredients: %w{ dark\ rum dry\ vermouth pineapple\ juice}, units: 'ounces'
 		html =<<EOF
 <ul class="structured-ingredients__list text-passage">
 <li class="structured-ingredients__list-item">
@@ -78,7 +96,6 @@ class ThespruceeatsDotComTest < ActiveSupport::TestCase
 </li>
 </ul>
 EOF
-    # html = '<li class="ingredient-group"><strong>Crust</strong><ul class="ingredients"><li class="ingredient" itemprop="ingredients">1 1/2 cups all purpose flour</li><li class="ingredient" itemprop="ingredients">3 tablespoons sugar</li><li class="ingredient" itemprop="ingredients">1/4 teaspoon salt</li><li class="ingredient" itemprop="ingredients">1/2 cup (1 stick) chilled unsalted butter, cut into 1/2-inch cubes</li><li class="ingredient" itemprop="ingredients">2 tablespoons chilled whipping cream</li><li class="ingredient" itemprop="ingredients">1 large egg yolk</li></ul></li>'
     pt_apply :rp_inglist, html: html, ingredients: @ingredients, units: @units, conditions: @conditions
   end
 
@@ -100,11 +117,9 @@ EOF
   end
 
   test 'recipe loaded correctly' do
-=begin
-             ingredients: %w{ lemon\ zest lemon\ juice sourdough\ bread anchovy\ fillets },
-             conditions: %w{ crustless },
-             units: %w{ g }
-=end
+    pt_apply url: "https://www.thespruceeats.com/yaka-hula-hickey-dula-759854",
+             ingredients: %w{ dark\ rum dry\ vermouth pineapple\ juice },
+             units: 'ounces'
     assert_not_empty @page, "No page url specified for ParseTester"
     pt_apply url: @page, ingredients: @ingredients, units: @units, conditions: @conditions
     # The ParseTester applies the setup parameters to the recipe
