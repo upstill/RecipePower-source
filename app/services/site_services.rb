@@ -464,4 +464,51 @@ class SiteServices
         to_a
   end
 
+  def parsing_report recipe, label
+    puts "Recipe ##{recipe.id} ('#{recipe.title}') #{label}:"
+    content = recipe.content.if_present&.gsub(/\s/, ' ') || 'nil'
+    puts "\tcontent: '#{content.truncate 50}'"
+    return true unless recipe.content.present?
+    puts "\t#{TaggingServices.new(recipe).taggings(User.inventory_user).count} tags"
+    nkdoc = Nokogiri::HTML.fragment recipe.content
+    # Every ingline should have an ingspec.
+    ninglines = nkdoc.css('.rp_ingline').count
+    ningspecs = nkdoc.css('.rp_ingspec').count
+    if ninglines == 0
+      puts "\tNo parsed ingredient lines"
+      true
+    else
+      puts "\t#{ninglines} ingredient lines #{ninglines == ningspecs ? 'matches' : 'does not match'} #{ningspecs} ingredient specs"
+      if ninglines == ningspecs
+        false
+      else
+        puts "\tFailed lines:"
+        nkdoc.css('.rp_ingline').each do |line|
+          next if line.css('.rp_ingspec').present?
+          puts "\t\t#{line.to_s.gsub(/\s/, ' ')}"
+        end
+        true
+      end
+    end
+  end
+
+  # Study the recipes of a site
+  def probe_parsings set=@site.recipes
+    redoes = set.collect do |r|
+      puts '------------------------------------'
+      do_over = parsing_report r, 'on entry'
+      if do_over
+        puts "\t...needs to be reparsed"
+        r
+      else
+        puts "\t...seems good..."
+      end
+    end
+    puts '============= Suspicious Recipes ===================='
+    redoes.compact.each do |r|
+      parsing_report r, 'on exit'
+      puts '------------------------------------'
+    end
+  end
+
 end

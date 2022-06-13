@@ -217,6 +217,29 @@ namespace :sites do
     end
   end
 
+  # Enforce parsing on the recipes in a site
+  task :probe_parsings, [:site_id] => :environment do |t, args|
+    site = Site.find(args[:site_id].if_present || 4072)
+    ss = SiteServices.new site
+    redoes = ss.probe_parsings
+    if redoes.empty?
+      puts "All recipes are copacetic!!"
+    else
+      start_count = redoes.count
+      redoes.each { |r|
+        r.refresh_attributes [:content]
+        r.ensure_attributes [:content]
+        if r.errors.any?
+          puts "!!! Parsing error: #{r.errors.full_messages}"
+        else
+          r.save
+        end
+      }
+      end_count = ss.probe_parsings(redoes).count
+      puts "Fixed #{start_count - end_count} out of #{start_count} recipes"
+    end
+  end
+
   task :my_task, [:arg1, :arg2] do |t, args|
     puts "Args were: #{args} of class #{args.class}"
     puts "arg1 was: '#{args[:arg1]}' of class #{args[:arg1].class}"

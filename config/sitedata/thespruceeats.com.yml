@@ -4,6 +4,9 @@
 :trimmers:
 - ul.tag-nav__list
 - ul.social-nav__list
+- div.js-scads-inline-content
+- button.mntl-relish-save-btn
+- div.mntl-author-tooltip
 - div.figure__media
 - div.aggregate-star-rating
 - figure
