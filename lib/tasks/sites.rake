@@ -217,14 +217,44 @@ namespace :sites do
     end
   end
 
+  def collect_tags tagtype
+    puts "#{tagtype} tag(s)? (one per line until blank line)"
+    newtags = []
+    line = ''
+    # while line.present?
+    while (line = STDIN.gets.chomp).present?
+      unless Tag.strmatch(line, tagtype: tagtype).exists?
+        newtags << Tag.assert(line, tagtype)
+      end
+      line = ''
+      x=2
+    end
+    # Now newtags is a set of new tags matching the strings
+    newtags
+  end
+
+  def report_problems redoes
+    if (failures = redoes.keep_if { |recipe| recipe.content.nil? }).present?
+      ids = failures.map(&:id).map(&:to_s)
+      if ids.count == 1
+        puts "FYI: Recipe ##{ids.first} (#{failures.first.title}) has no content."
+      else
+        ids = (ids[0..-2].join ', ') + " and #{ids.last}"
+        puts "FYI: #{failures.count} recipes (ids #{ids}) have no content."
+      end
+    end
+  end
+
   # Enforce parsing on the recipes in a site
   task :probe_parsings, [:site_id] => :environment do |t, args|
-    site = Site.find(args[:site_id].if_present || 4072)
+    site = Site.find(args[:site_id].if_present || 3965)
     ss = SiteServices.new site
+    # Examine each recipe for consistency of content
     redoes = ss.probe_parsings
     if redoes.empty?
       puts "All recipes are copacetic!!"
     else
+      # Try once more to parse the recipes that need redoing
       start_count = redoes.count
       redoes.each { |r|
         r.refresh_attributes [:content]
@@ -235,8 +265,55 @@ namespace :sites do
           r.save
         end
       }
-      end_count = ss.probe_parsings(redoes).count
-      puts "Fixed #{start_count - end_count} out of #{start_count} recipes"
+      # Having reparsed all recipes, see which are still not complete
+      remainder = ss.probe_parsings(redoes)
+      end_count = remainder.count
+      # Before proceeding, report on recipes that can't be fetched
+      remainder.keep_if do |recipe|
+        next true if recipe.parser_input.present?
+        # It's a waste of time trying to parse a recipe that has no content to parse.
+        puts "Recipe ##{recipe.id} (#{recipe.title}) has no content to parse."
+        puts "\tURI #{recipe.url}"
+        puts "\tGleaning HTTP status #{recipe.page_ref.gleaning.http_status}"
+        false
+      end
+      report = "Fixed #{start_count - end_count} out of #{start_count} recipes."
+      ninaccessible = end_count - remainder.count
+      report << "\nDispensed with #{ninaccessible} that #{ninaccessible > 1 ? 'have' : 'has'} no parseable content (perhaps due to dead page?)" if ninaccessible > 0
+      puts report
+      puts "#{remainder.count} recipes fail parsing. Shall we address the issues?"
+      line = 'Y'
+      line = STDIN.gets.chomp
+      unless line.match /[yY]/
+        puts "Okay then. Bye!"
+        report_problems redoes
+      else
+        # So now we have a batch of problematic recipes. We'll attempt to redress problems by adding ingredient,
+        # condition and/or unit tags.
+        ParserServices.report_on = true
+        remainder.each do |recipe|
+          next unless recipe.content.present? # We bail if parsing failed entirely
+          # First, parse the recipe again for a fresh presentation
+          recipe.refresh_attributes [:content]
+          recipe.ensure_attributes [:content]
+          ss.parsing_report recipe, recipe.url
+          %w{ Ingredient Condition Unit }.each { |tagtype|
+            next unless (newtags = collect_tags(tagtype)).present? # Interactively get some tags to fix the parse
+            # If any new tags are provided, reparse the recipe using them
+            tagsumm = newtags.map(&:name).join "', '"
+            puts "New #{tagtype} tag(s) specified: '#{tagsumm}'"
+            unless newtags.all? { |tag| Lexaur.augment_cache tagtype, tag.name, tag.id }
+              # Roll back the tags database
+              x = 2 # Stop here please!
+            end
+            # Now reparse the recipe to see how we fare...
+            recipe.refresh_attributes [:content]
+            recipe.ensure_attributes [:content]
+            # ...and report the result
+            break unless ss.parsing_report recipe, "after adding #{tagtype} tags"
+          }
+        end
+      end
     end
   end
 

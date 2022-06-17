@@ -28,6 +28,7 @@ require 'enumerable_utils.rb'
 # 1 pound 5 ounces (600g) eggplants (1–2 large)
 class Parser
   include GrammarMods
+  attr_accessor :report_on
   attr_reader :grammar, :patternista, :benchmarks
 
   @@TokenTitles = {
@@ -340,15 +341,6 @@ class Parser
       atomic_tokens[key] = true if (grammar[key].is_a?(Hash) && (grammar[key][:tag] || grammar[key][:tags])) || [ :rp_title, :rp_ing_comment ].include?(key)
     end if grammar
     atomic_tokens
-  end
-
-  # Maintain instance variable controlling parse logging outside of testing
-  def report_on
-    @report_on || Rails.env.test? || Rails.env.development?
-  end
-
-  def report_on=bool
-    @report_on = bool
   end
 
   private

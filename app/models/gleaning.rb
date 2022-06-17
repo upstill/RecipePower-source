@@ -76,6 +76,16 @@ class Gleaning < ApplicationRecord
     results&.labels || []
   end
 
+  def drive_dependencies minimal_attributes=needed_attributes, overwrite: false, restart: false
+    needed_by_super = defined?(super) && super
+    if needed_attributes.present?
+      self.results = nil
+      true
+    else
+      needed_by_super
+    end
+  end
+
   def adopt_dependencies synchronous: false, final: false
     return if bad? || results.empty?
     results.labels.each do |label|
@@ -95,7 +105,7 @@ class Gleaning < ApplicationRecord
           end
       self.send :"#{attrname}=", value
     end
-    self.content_needed = false # It is a non-fatal error if content can't be extracted
+    self.content_needed = false if final # It is a non-fatal error if content can't be extracted
   end
 
   def relaunch_on_error?

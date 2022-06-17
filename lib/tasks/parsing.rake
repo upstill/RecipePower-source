@@ -28,6 +28,27 @@ namespace :parsing do
     end
   end
 
+  # Parse a recipe 100 times with and without building the Lexaur each time
+  task lex_test: :environment do
+    ParserServices.report_on = false
+    recipe = Recipe.find 15584
+    NestedBenchmark.do_log = true
+    NestedBenchmark.measure("Parsing with Lexaur cache ON") do
+      100.times.each do |i|
+        recipe.request_attributes [:content], overwrite: true
+        recipe.perform
+      end
+    end
+
+    NestedBenchmark.measure("Parsing with Lexaur cache OFF") do
+      100.times.each do |i|
+        recipe.request_attributes [:content], overwrite: true
+        recipe.perform
+        Lexaur.bust_cache
+      end
+    end
+  end
+
   task import: :environment do
 
     flush_bfr = ->(bfr) {

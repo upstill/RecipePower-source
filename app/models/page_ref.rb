@@ -130,10 +130,10 @@ class PageRef < ApplicationRecord
     # Filter the minimal attributes for those which are actually still needed
     minimal_attributes = attribs_needed! minimal_attributes, overwrite: overwrite
     if (nfg = needed_from_gleaning & minimal_attributes).present? && (!gleaning&.bad? || restart)
-      ensure_gleaning.request_attributes nfg, overwrite: overwrite, restart: restart
+      ensure_gleaning.request_attributes nfg # , overwrite: overwrite, restart: restart
     end
     if (nfm = needed_from_mercury & minimal_attributes).present? && (!mercury_result&.bad? || restart)
-      ensure_mercury_result.request_attributes nfm, overwrite: overwrite, restart: restart
+      ensure_mercury_result.request_attributes nfm # , overwrite: overwrite, restart: restart
     end
     adopt_dependencies if nfm.present? || nfg.present? # Maybe attributes appeared during creation?
     # We need to get attributes from Gleaning and/or Mercury

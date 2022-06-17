@@ -478,11 +478,12 @@ class SiteServices
       puts "\tNo parsed ingredient lines"
       true
     else
-      puts "\t#{ninglines} ingredient lines #{ninglines == ningspecs ? 'matches' : 'does not match'} #{ningspecs} ingredient specs"
       if ninglines == ningspecs
+        puts "All #{ninglines} ingredient lines have an ingspec. Cool!"
         false
       else
-        puts "\tFailed lines:"
+        nbereft = ninglines-ningspecs
+        puts "\t#{nbereft} out of #{ninglines} ingredient lines #{nbereft > 1 ? 'don\'t' : 'doesn\'t'} have an ingspec:"
         nkdoc.css('.rp_ingline').each do |line|
           next if line.css('.rp_ingspec').present?
           puts "\t\t#{line.to_s.gsub(/\s/, ' ')}"
@@ -508,6 +509,7 @@ class SiteServices
     redoes.compact.each do |r|
       parsing_report r, 'on exit'
       puts '------------------------------------'
+      yield r if block_given?
     end
   end
 

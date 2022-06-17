@@ -130,7 +130,7 @@ module Pagerefable
     if synchronous
       # Force the page_ref to complete its background work (and that of its dependencies)
       page_ref.adopt_dependencies synchronous: true, final: final
-      page_ref.bkg_land! true if attributes_due_from_page_ref.present?
+      page_ref.bkg_land! true if attributes_due_from_page_ref.present? && page_ref.needed_attributes.present?
     end
     super if defined? super
   end

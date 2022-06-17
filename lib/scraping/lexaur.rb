@@ -15,6 +15,7 @@ require 'scraping/lex_result.rb'
 class Lexaur < Object
   attr_accessor :terminals, # Data stashed for the head word: an array of unique data values
                 :nexts # Recurrence: hash on head word for subsequent strings
+  @@LexCache = nil
 
   # Build a tree of Lexaur objects, returning the root
   def initialize
@@ -24,13 +25,27 @@ class Lexaur < Object
 
   # Build a Lexaur tree from the collection of tags in the database
   def self.from_tags *types
-    lex = self.new
-    # puts "Creating Lexaur from tags of type(s) '" + types.join("', '") + '\'.'
-    Tag.of_type(types).each { |tag|
-      puts "#{tag.typename}: (#{tag.id}) #{tag.name}" if Rails.env.test?
-      lex.take tag.name, tag.id
-    }
-    lex
+    # If the cache is still valid for all given types, return that.
+    # Otherwise, initialize and continue
+    self.in_cache(*types) || self.cache_lex(*types)
+  end
+
+  # Declare that the Lexaur cache is expired due to an otherwise undetectable
+  # change in the Tags database, ie., a tag may have changed
+  def self.bust_cache
+    @@LexCache = nil
+  end
+
+  def self.augment_cache type, name, id
+    raise "There is no Lexaur cache to augment" unless @@LexCache
+    @@LexCache[:cached].take name, id
+    @@LexCache[:counts][Tag.typesym(type)] += 1
+    unless self.in_cache *@@LexCache[:counts].keys # Consistency check
+      puts "Lexaur failed in augmentation after inserting #{type} Tag##{id} '#{name}'"
+      false
+    else
+      true
+    end
   end
 
   # Process a string or an array of strings to find a place in the tree to store the data
@@ -151,6 +166,34 @@ class Lexaur < Object
   end
 
   private
+
+  # Consult the cache:
+  # IF there is in fact a cache, and
+  # IF the types list matches that which went into the cache, and
+  # IF the number of tags of each type in the same between the cache and the DB
+  # THEN the cache is valid.
+  # NB: this strategy won't work if the DB has changed without affecting the
+  # number of tags of each type, either by a weird re-initialization step (hello, testing),
+  # or (more likely) some tag has changed. In that case we'll need to bust the cache
+  def self.in_cache *types
+    @@LexCache &&
+        @@LexCache[:counts].keys == types.map { |type| Tag.typesym type } &&
+        types.all? do |type|
+          @@LexCache[:counts][Tag.typesym(type)] == Tag.of_type(type).count
+        end &&
+        @@LexCache[:cached]
+  end
+
+  def self.cache_lex *types
+    @@LexCache = { cached: (lex = self.new), counts: {} }
+    types.each { |type| @@LexCache[:counts][Tag.typesym(type)] = Tag.of_type(type).count }
+    # puts "Creating Lexaur from tags of type(s) '" + types.join("', '") + '\'.'
+    Tag.of_type(types).each { |tag|
+      puts "#{tag.typename}: (#{tag.id}) #{tag.name}" if Rails.env.test?
+      lex.take tag.name, tag.id
+    }
+    lex
+  end
 
   # Our own #split function which (currently) separates out punctuation
   def split string_or_strings

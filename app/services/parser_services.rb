@@ -3,6 +3,7 @@ require 'scraping/parser.rb'
 require 'recipe_page.rb'
 
 class ParserServices
+  attr_accessor :report_on
   attr_reader :parsed, # Trees of seeker results resulting from parsing and scanning, respectively
               :grammar_mods, # Modifications to be used on the parser beforehand
               :input,
@@ -12,7 +13,18 @@ class ParserServices
   delegate :nkdoc, to: :scanner # ...assuming it's a NokoScanner
   delegate :'success?', :find, :hard_fail?, :find_value, :value_for, :xbounds, to: :parsed
 
+  @@ReportOn = nil
+
+  def self.report_on=ro
+    @@ReportOn = ro
+  end
+
+  def self.report_on
+    @@ReportOn
+  end
+
   def initialize entity: nil, token: nil, input: nil, lexaur: nil, grammar_mods: nil
+    @report_on = @@ReportOn.nil? ? (Rails.env.development? || Rails.env.test?) : @@ReportOn
     self.entity = entity # Object (ie., Recipe or RecipePage) to be parsed
     self.token = token
     self.input = input
@@ -63,9 +75,10 @@ class ParserServices
 
   # Apply the parser to a NokoScanner
   def parser
-    @parser ||= Parser.new scanner, @lexaur, @grammar_mods
-    puts "Activating parser with report #{@report_on ? 'on' : 'off'}"
-    @parser.report_on = @report_on # Optionally turn on reporting
+    return @parser if @parser
+    @parser = Parser.new scanner, @lexaur, @grammar_mods
+    @parser.report_on = @@ReportOn
+    # puts "Activating parser with report #{@report_on ? 'on' : 'off'}"
     @parser
   end
 

@@ -90,6 +90,15 @@ class Recipe < ApplicationRecord
   # These HTTP response codes lead us to conclude that the URL is not valid
   @@BadResponseCodes = [400, 404, 410]
 
+  # HTML code for parsing, derived from recipe_page (if any) or page_ref
+  def parser_input
+    # If there's an associated RecipePage, then we'll be depending on its content
+    await recipe_page if page_ref.recipe_page_ready?
+    (anchor_path.present? && focus_path.present?) ?
+        recipe_page&.selected_content(anchor_path, focus_path) :
+        page_ref.trimmed_content
+  end
+
   # -> true, false, nil
   # Report on the reachability of a Gleanable.
   # return true if EITHER the pageref or the gleaning succeed (definitely reachable)
@@ -145,7 +154,7 @@ class Recipe < ApplicationRecord
   # Request attributes from page_ref as necessary, after record is saved.
   # Return: boolean indicating need to start background processing
   def drive_dependencies minimal_attribs=needed_attributes, overwrite: false, restart: false
-    super || content_needed?
+    super(minimal_attribs) || content_needed?
   end
 
   # Override to acccept values from page_ref, optionally forcing it to completion
@@ -189,12 +198,7 @@ class Recipe < ApplicationRecord
     # if changes during page parsing were significant
     need_now = needed_attributes & [ :content, :ingredients, :instructions, :prep_time, :cook_time, :total_time, :yields, :serves ]
     if need_now.present?
-      # If there's an associated RecipePage, then we'll be depending on its content
-      await recipe_page if page_ref.recipe_page_ready?
-      content_to_parse =
-        (recipe_page&.selected_content(anchor_path, focus_path) if anchor_path.present? && focus_path.present?) ||
-        page_ref.trimmed_content
-      if content_to_parse.present? # Can't proceed w/o something to parse!
+      if (content_to_parse = parser_input).present? # Can't proceed w/o something to parse!
         # Translate the recipe attributes into grammar tokens
         as_tokens = need_now.collect { |attrname| attribute_as_token attrname }.compact
         ps = ParserServices.new entity: self, input: content_to_parse, grammar_mods: site.grammar_mods

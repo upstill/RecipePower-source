@@ -47,10 +47,6 @@ module Trackable
           osetter = :"o_tkbl_#{attrname}_eq"
           alias_method osetter, setter if public_instance_methods.include?(setter)
           define_method setter do |val|
-            if Rails.env.development? || Rails.env.test?
-              printable = val.is_a?(String) ? "'#{val.truncate 100}'" : val.to_s
-              puts "#{self.class} writing #{printable} to #{attrname}"
-            end
             # Clear 'needed' bit and set the 'ready' bit
             attrib_done attrname
             if defined?(super)
@@ -240,7 +236,7 @@ module Trackable
   end
 
   # Stub to be overridden that an object uses to:
-  # 1) hold until prequisites are fulfilled by others
+  # 1) hold until prerequisites are fulfilled by others
   # 2) send heavy computing into background.
   # In either case, return true to launch for background processing
   # NB: this is an object's chance to extract values without awaiting others, if possible
@@ -321,7 +317,6 @@ module Trackable
   # Set the 'needed' bit for the attribute and return the attribute_sym iff wasn't needed before
   def attrib_needed! attrib_sym, needed_now=true
     unless attrib_needed?(attrib_sym) == needed_now
-      puts "Declaring #{attrib_sym} needed"
       self.send :"#{attrib_sym}_needed=", needed_now
       attrib_sym
     end
