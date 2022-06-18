@@ -315,6 +315,7 @@ module Backgroundable
   # Run the job, mimicking the hook calls of DJ.
   # We rescue errors so that interrupts only declare errors
   def perform_without_dj
+    puts "Running DelayedJob on #{self.class}##{id}"
     begin
       before
       perform
@@ -394,6 +395,7 @@ module Backgroundable
 
   # Raise an interrupt and wait till later if the other hasn't completed
   def await other
+    puts "#{self.class}##{id} awaiting #{other.class}##{other.id} with DelayedJob##{other.dj_id}"
     unless other.complete?
       # What to do next depends on whether we're running in a DelayedJob queue (dj exists) or not
       if dj
