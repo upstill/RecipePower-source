@@ -302,7 +302,7 @@ namespace :sites do
       puts "Fixed #{start_count - end_count} out of #{start_count} recipes."
       if bogus.present?
         puts "Dispensed with #{bogus.count} that #{bogus.count > 1 ? 'have' : 'has'} no parseable content (perhaps due to dead page?):"
-        bogus.each { |recipe| puts "Recipe ##{recipe.id} (#{recipe.title}) => #{recipe.url}" }
+        bogus.each { |recipe| puts "\t-- '#{recipe.title}' (##{recipe.id} => #{recipe.url}" }
       end
       puts "#{remainder.count} recipes fail parsing. Shall we address the issues?"
       line = 'Y'
