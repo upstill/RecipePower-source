@@ -267,6 +267,7 @@ namespace :sites do
       }
       # Having reparsed all recipes, see which are still not complete
       remainder = ss.probe_parsings(redoes)
+      bogus = []
       end_count = remainder.count
       # Before proceeding, report on recipes that can't be fetched
       remainder.keep_if do |recipe|
@@ -285,7 +286,12 @@ namespace :sites do
               page_ref.ensure_attributes [:content]
             end
           end
-          next true if recipe.parser_input.present?  # Got it
+          if recipe.parser_input.present?  # Got it
+            true
+          else
+            bogus << recipe
+            false
+          end
         end
         # It's a waste of time trying to parse a recipe that has no content to parse.
         puts "Recipe ##{recipe.id} (#{recipe.title}) has no content to parse."
@@ -293,10 +299,11 @@ namespace :sites do
         puts "\tGleaning HTTP status #{recipe.page_ref.gleaning.http_status}" if recipe&.page_ref&.gleaning
         false
       end
-      report = "Fixed #{start_count - end_count} out of #{start_count} recipes."
-      ninaccessible = end_count - remainder.count
-      report << "\nDispensed with #{ninaccessible} that #{ninaccessible > 1 ? 'have' : 'has'} no parseable content (perhaps due to dead page?)" if ninaccessible > 0
-      puts report
+      puts "Fixed #{start_count - end_count} out of #{start_count} recipes."
+      if bogus.present?
+        puts "Dispensed with #{bogus.count} that #{bogus.count > 1 ? 'have' : 'has'} no parseable content (perhaps due to dead page?):"
+        bogus.each { |recipe| puts "Recipe ##{recipe.id} (#{recipe.title}) => #{recipe.url}" }
+      end
       puts "#{remainder.count} recipes fail parsing. Shall we address the issues?"
       line = 'Y'
       line = STDIN.gets.chomp
