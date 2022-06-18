@@ -333,7 +333,11 @@ namespace :sites do
             recipe.refresh_attributes [:content]
             recipe.ensure_attributes [:content]
             # ...and report the result
-            break unless ss.parsing_report recipe, "after adding #{tagtype} tags"
+            unless ss.parsing_report recipe, "after adding #{tagtype} tags"
+              # All done!
+              recipe.save
+              break
+            end
           }
         end
       end
