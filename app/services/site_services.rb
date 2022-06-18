@@ -151,7 +151,6 @@ class SiteServices
       # Remove nodes from the content according to the site's :trimmers collection
       trimmers = (site.trimmers || []) + ['script'] # Squash all <script> elements
       trimmers.each do |trimmer|
-        Rails.logger.debug "Trimming with CSS selector #{trimmer}"
         begin
           matches = @nkdoc.css(*CSSExtender.args(trimmer)).remove # Protection against bad trimmer
         rescue Exception => exc
@@ -162,7 +161,6 @@ class SiteServices
         # Ensure that link tags have a global url
         if node.element? && (node.name == 'a') && (url = node.attribute('href').to_s).present?
           absolute = safe_uri_join(site.home, url).to_s
-          Rails.logger.debug "'#{url}' absolutizes to '#{absolute}' in the context of '#{site.home}'"
           node.attribute('href').value = absolute if absolute != url
         elsif node.text?
           # Reduce all sequences of whitespace in text strings to either
