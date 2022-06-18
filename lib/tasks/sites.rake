@@ -222,7 +222,7 @@ namespace :sites do
     newtags = []
     line = ''
     # while line.present?
-    while (line = STDIN.gets.chomp).present?
+    while (line = STDIN.gets.chomp.encode('UTF-8')).present?
       unless Tag.strmatch(line, tagtype: tagtype).exists?
         newtags << Tag.assert(line, tagtype)
       end
