@@ -42,9 +42,9 @@ class Lexaur < Object
     @@LexCache[:counts][Tag.typesym(type)] += 1
     unless self.in_cache *@@LexCache[:counts].keys # Consistency check
       puts "Lexaur failed in augmentation after inserting #{type} Tag##{id} '#{name}'"
-      false
+      nil
     else
-      true
+      @@LexCache[:cached]
     end
   end
 

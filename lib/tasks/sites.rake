@@ -223,8 +223,11 @@ namespace :sites do
     line = ''
     # while line.present?
     while (line = STDIN.gets.chomp.encode('UTF-8')).present?
-      unless Tag.strmatch(line, tagtype: tagtype).exists?
+      if Tag.strmatch(line, tagtype: tagtype).exists?
+        puts "There's already a tag '#{line}' of type #{Tag.typename tagtype}"
+      else
         newtags << Tag.assert(line, tagtype)
+        puts "Asserted #{newtags.last.persisted? ? 'and saved' : 'but didn\t save'} tag '#{line}' of type #{Tag.typename tagtype}"
       end
       line = ''
       x=2
@@ -325,7 +328,15 @@ namespace :sites do
             # If any new tags are provided, reparse the recipe using them
             tagsumm = newtags.map(&:name).join "', '"
             puts "New #{tagtype} tag(s) specified: '#{tagsumm}'"
-            unless newtags.all? { |tag| Lexaur.augment_cache tagtype, tag.name, tag.id }
+            unless newtags.all? do |tag|
+              if !(lex = Lexaur.augment_cache tagtype, tag.name, tag.id)
+                puts "Lexaur failed to fold in new #{tag.typename} tag '#{tag.name}' with ID #{tag.id}"
+                next false
+              end
+              if !lex.find(tag.name)&.include?(tag.id)
+                puts "Lexaur can't find new #{tag.typename} tag '#{tag.name}' with ID #{tag.id} after adding it"
+              end
+            end
               # Roll back the tags database
               x = 2 # Stop here please!
             end
