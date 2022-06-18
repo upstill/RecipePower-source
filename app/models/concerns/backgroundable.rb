@@ -398,16 +398,18 @@ module Backgroundable
     puts "#{self.class}##{id} awaiting #{other.class}##{other.id} with DelayedJob##{other.dj_id}"
     unless other.complete?
       # What to do next depends on whether we're running in a DelayedJob queue (dj exists) or not
+=begin
       if dj
         # If we have a job queued, throw an interrupt so we go back in the queue
         dj.attempts = dj.attempts - 1 if dj.attempts > 0
         raise "#{self.class}##{id} deferring to #{other.class}##{other.id}"
       else
+=end
         # If there's no DelayedJob associated with the record but it still needs to run, run it manually
         while !other.complete? do
           other.bkg_land! true
         end
-      end
+      # end
     end
   end
 
