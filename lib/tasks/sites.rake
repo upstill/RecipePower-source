@@ -271,10 +271,26 @@ namespace :sites do
       # Before proceeding, report on recipes that can't be fetched
       remainder.keep_if do |recipe|
         next true if recipe.parser_input.present?
+        if recipe.parser_input.blank?
+          # Check that the page_ref has content, updating it if not
+          page_ref = recipe.page_ref
+          if page_ref.content.blank?
+            page_ref.request_attributes [:content]
+            page_ref.ensure_attributes [:content]
+            if page_ref.content.blank?
+              gleaning = page_ref.gleaning
+              gleaning.request_attributes [:content]
+              gleaning.ensure_attributes [:content]
+              page_ref.request_attributes [:content]
+              page_ref.ensure_attributes [:content]
+            end
+          end
+          next true if recipe.parser_input.present?  # Got it
+        end
         # It's a waste of time trying to parse a recipe that has no content to parse.
         puts "Recipe ##{recipe.id} (#{recipe.title}) has no content to parse."
         puts "\tURI #{recipe.url}"
-        puts "\tGleaning HTTP status #{recipe.page_ref.gleaning.http_status}"
+        puts "\tGleaning HTTP status #{recipe.page_ref.gleaning.http_status}" if recipe&.page_ref&.gleaning
         false
       end
       report = "Fixed #{start_count - end_count} out of #{start_count} recipes."
