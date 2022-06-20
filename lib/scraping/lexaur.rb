@@ -176,12 +176,13 @@ class Lexaur < Object
   # number of tags of each type, either by a weird re-initialization step (hello, testing),
   # or (more likely) some tag has changed. In that case we'll need to bust the cache
   def self.in_cache *types
-    @@LexCache &&
-        @@LexCache[:counts].keys == types.map { |type| Tag.typesym type } &&
-        types.all? do |type|
-          @@LexCache[:counts][Tag.typesym(type)] == Tag.of_type(type).count
-        end &&
-        @@LexCache[:cached]
+    if @@LexCache
+      keys = types.present? ? types&.map { |type| Tag.typesym type } : @@LexCache[:counts].keys
+      @@LexCache[:cached] if (@@LexCache[:counts].keys.sort == keys.sort) &&
+          types.all? do |type|
+            @@LexCache[:counts][Tag.typesym(type)] == Tag.of_type(type).count
+          end
+    end
   end
 
   def self.cache_lex *types
@@ -193,6 +194,19 @@ class Lexaur < Object
       lex.take tag.name, tag.id
     }
     lex
+  end
+
+  # Do a rigorous check of the Lexaur cache against the Tags database
+  def self.cache_qa
+    return false unless lex = self.in_cache
+    Tag.all.each do |tag|
+      unless (found_tags = (lex.find tag.name)).present?
+        raise "Lexaur doesn't find #{tag.typename} tag ##{tag.id} '#{tag.name}'."
+      end
+      unless found_tags.include? tag.id
+        raise "Lexaur found ids #{found_tags} for #{tag.typename} tag ##{tag.id} '#{tag.name}'."
+      end
+    end
   end
 
   # Our own #split function which (currently) separates out punctuation

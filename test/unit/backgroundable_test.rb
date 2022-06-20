@@ -76,7 +76,7 @@ class BackgroundableTest < ActiveSupport::TestCase
     runtime = pr.dj.run_at
     pr.bkg_land
     assert_equal 500, pr.http_status
-    assert_not_equal runtime, pr.dj.run_at
+    assert_not_equal runtime, pr.dj.run_at if pr.dj
   end
 
 end

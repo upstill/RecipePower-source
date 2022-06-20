@@ -60,6 +60,7 @@ module PTInterface
   def teardown
     report = ParserServices.benchmark_formatted @parse_tester.benchmarks
     report.each { |key, value| puts value}
+      # Lexaur.bust_cache
   end
 end
 
@@ -94,7 +95,9 @@ class ParseTester < ActiveSupport::TestCase
     add_tags :Ingredient, params[:ingredients] # To support single strings
     add_tags :Unit, params[:units]
     add_tags :Condition, params[:conditions]
+    Lexaur.cache_qa
     @lexaur = Lexaur.from_tags
+    Lexaur.cache_qa
     # We define a useless parser to enable checks on the grammar coming out of @grammar_mods
     @parser = Parser.new 'bogus text', Lexaur.from_tags, @grammar_mods
   end
