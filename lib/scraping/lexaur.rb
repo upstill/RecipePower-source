@@ -33,12 +33,13 @@ class Lexaur < Object
   # Declare that the Lexaur cache is expired due to an otherwise undetectable
   # change in the Tags database, ie., a tag may have changed
   def self.bust_cache
-    @@LexCache = nil
+    @@LexCache[:cached] = nil if @@LexCache
   end
 
   def self.augment_cache type, name, id
-    raise "There is no Lexaur cache to augment" unless @@LexCache
+    return unless @@LexCache && @@LexCache[:cached]
     @@LexCache[:cached].take name, id
+    @@LexCache[:counts][Tag.typesym(type)] ||= 0
     @@LexCache[:counts][Tag.typesym(type)] += 1
     unless self.in_cache *@@LexCache[:counts].keys # Consistency check
       puts "Lexaur failed in augmentation after inserting #{type} Tag##{id} '#{name}'"
@@ -176,19 +177,27 @@ class Lexaur < Object
   # number of tags of each type, either by a weird re-initialization step (hello, testing),
   # or (more likely) some tag has changed. In that case we'll need to bust the cache
   def self.in_cache *types
-    if @@LexCache
-      keys = types.present? ? types&.map { |type| Tag.typesym type } : @@LexCache[:counts].keys
-      @@LexCache[:cached] if (@@LexCache[:counts].keys.sort == keys.sort) &&
+    if @@LexCache && @@LexCache[:cached]
+      types = types.present? ? types&.map { |type| Tag.typesym type } : @@LexCache[:counts].keys
+      @@LexCache[:cached] if (@@LexCache[:counts].keys.sort == types.sort) && # The incoming counts keys match the existing keys
           types.all? do |type|
             @@LexCache[:counts][Tag.typesym(type)] == Tag.of_type(type).count
           end
     end
   end
 
+  def self.cached_types
+    @@LexCache[:counts].keys if @@LexCache
+  end
+
   def self.cache_lex *types
-    @@LexCache = { cached: (lex = self.new), counts: {} }
-    types.each { |type| @@LexCache[:counts][Tag.typesym(type)] = Tag.of_type(type).count }
-    # puts "Creating Lexaur from tags of type(s) '" + types.join("', '") + '\'.'
+    # The list of types defaults to the list from the cache, or all extant tag types
+    types = (@@LexCache ? @@LexCache[:counts].keys : Tag.all_types) unless types.present?
+    types = types.map { |type| Tag.typesym type }
+
+    @@LexCache = {cached: (lex = self.new), counts: {}}
+    types.each { |type| @@LexCache[:counts][type] = Tag.of_type(type).count }
+    puts "Creating Lexaur from tags of type(s) '" + types.join("', '") + '\'.'
     Tag.of_type(types).each { |tag|
       puts "#{tag.typename}: (#{tag.id}) #{tag.name}" if Rails.env.test?
       lex.take tag.name, tag.id
@@ -199,12 +208,14 @@ class Lexaur < Object
   # Do a rigorous check of the Lexaur cache against the Tags database
   def self.cache_qa
     return false unless lex = self.in_cache
-    Tag.all.each do |tag|
-      unless (found_tags = (lex.find tag.name)).present?
-        raise "Lexaur doesn't find #{tag.typename} tag ##{tag.id} '#{tag.name}'."
-      end
-      unless found_tags.include? tag.id
-        raise "Lexaur found ids #{found_tags} for #{tag.typename} tag ##{tag.id} '#{tag.name}'."
+    Lexaur.cached_types.each do |type|
+      Tag.of_type(type).each do |tag|
+        unless (found_tags = (lex.find tag.name)).present?
+          raise "Lexaur doesn't find #{tag.typename} tag ##{tag.id} '#{tag.name}'."
+        end
+        unless found_tags.include? tag.id
+          raise "Lexaur found ids #{found_tags} for #{tag.typename} tag '#{tag.name}', which doesn't match its id of #{tag.id}."
+        end
       end
     end
   end

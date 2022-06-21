@@ -57,8 +57,9 @@ module Typeable
       index if index && (index <= @tag_types.max_index)
     end
 
-    # Return a list of all valid types
+    # Return a list of all valid types as integers
     def all_types
+      @tag_types.list.map &:last
     end
 
   end
