@@ -3,14 +3,14 @@ source 'http://rubygems.org'
 ruby '2.6.6'
 gem 'rack', '2.2.3'
 gem 'bundler', '~> 2.1.4'
-gem 'rails', '~> 5.2.4' # 5.0.7.2' #
+gem 'rails', '~> 5.2.8', '>= 5.2.8.1' # 5.0.7.2' #
 gem 'rdoc'
 
 ###### Rails Extensions
 # Protect attributes from mass-assignment in ActiveRecord models. (No longer supported in Rails 5)
 ## gem 'protected_attributes' # https://github.com/rails/protected_attributes
 # Counter caches
-gem 'counter_culture', '~> 0.1.23' # https://github.com/magnusvk/counter_culture
+gem 'counter_culture', '~> 0.1.34' # https://github.com/magnusvk/counter_culture
 # Can't implement categorization via Awesome Nested Set b/c we need a digraph, not exclusive categories
 # gem 'awesome_nested_set' # https://github.com/collectiveidea/awesome_nested_set
 # Forms made easy for Rails!
@@ -18,8 +18,8 @@ gem "simple_form" # , '~> 4.1.0' # https://github.com/plataformatec/simple_form
 # Decorators/View-Models for Rails Applications
 gem 'draper' # , '~> 3.0' #, ~> 1.3'
 # Easily and efficiently make your ActiveRecord models support hierarchies
-gem 'closure_tree', '~> 7.0' # https://github.com/mceachen/closure_tree
-gem 'with_advisory_lock', '~> 4.0'
+gem 'closure_tree', '~> 7.1', '>= 7.1.0' # https://github.com/mceachen/closure_tree
+gem 'with_advisory_lock', '~> 4.6', '>= 4.6.0'
 # TODO Cache bit in each tag, for each taggable entity class, indicating that the tag is used.
 ## gem 'attr_bitwise' # https://github.com/wittydeveloper/attr_bitwise/
 gem 'barkick' # Handle UPC codes, etc.
