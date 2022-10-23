@@ -1,9 +1,9 @@
 source 'http://rubygems.org'
 
 ruby '2.6.6'
-gem 'rack', '2.2.3'
+gem 'rack', '3.0.0'
 gem 'bundler', '~> 2.1.4'
-gem 'rails', '~> 5.2.4' # 5.0.7.2' #
+gem 'rails', '~> 5.2.4', '>= 5.2.4.3' # 5.0.7.2' #
 gem 'rdoc'
 
 ###### Rails Extensions
@@ -54,29 +54,29 @@ gem 'thin'
 gem 'activity_notification' # , '1.4.4', :path => 'vendor/gems/activity_notification-1.4.4'
 
 ####### JQuery, Coffeescript and Bootstrap
-gem 'jquery-rails', '~> 4.1.0' # '~> 4.2.0' # '~> 4.3.3' # ~> 4.0' # '2.2.1' to get jQuery 1.9.1
+gem 'jquery-rails', '~> 4.1.1' # '~> 4.2.0' # '~> 4.3.3' # ~> 4.0' # '2.2.1' to get jQuery 1.9.1
 ## gem 'jquery-rails-google-cdn'
-gem 'jquery-ui-rails', '~> 3.0'
+gem 'jquery-ui-rails', '~> 3.0', '>= 3.0.1'
 gem 'coffee-rails' # , "~> 4.2"
 gem 'uglifier', '>= 1.3.0'
 ## gem 'compass-rails'
-gem 'sass-rails', " ~> 5.0"
+gem 'sass-rails', '~> 5.1', '>= 5.1.0'
 gem 'bootstrap-sass', '~> 3.3.4' # '~> 3.1.1'
 ## gem 'bootstrap-sass', github: 'thomas-mcdonald/bootstrap-sass', branch: '3'
 gem 'autoprefixer-rails'
 # gem 'jquery-migrate-rails' # TODO: remove after jQuery 1.9 is confirmed  https://jquery.com/upgrade-guide/1.9/
 gem 'masonry-rails'
-gem 'jquery-fileupload-rails', '~> 1.0' # '0.4.7'
+gem 'jquery-fileupload-rails', '~> 1.0', '>= 1.0.0' # '0.4.7'
 gem 'sassc' # , '~> 1.12' # Version 2.0 requires Ruby 2.3
 
 ###### Authentication and authorization
-gem 'devise', '~> 4.0'                       # auth, rails generate devise:install, rails generate devise MODEL
-gem 'devise_invitable', '~> 1.6' # git: 'git://github.com/scambra/devise_invitable.git'
+gem 'devise', '~> 4.7', '>= 4.7.2' # auth, rails generate devise:install, rails generate devise MODEL
+gem 'devise_invitable', '~> 1.7', '>= 1.7.5' # git: 'git://github.com/scambra/devise_invitable.git'
 gem 'ruby-openid'
 gem 'omniauth-twitter'
 gem 'omniauth-facebook', '~> 4.0.0'
 gem 'omniauth-google-oauth2'
-gem 'omniauth-openid'
+gem 'omniauth-openid', '>= 2.0.1'
 gem 'pundit'
 # gem 'declarative_authorization', git: 'http://github.com/stffn/declarative_authorization.git'     # simple auth rules/roles, create config/authorization_rules.rb, add filter_resource_access to each controller, use permitted_to? in views
 
@@ -127,7 +127,7 @@ group :development do
   ## gem "better_errors" '~> 1.1'
   gem "binding_of_caller"
   ## gem "json"
-  gem 'rack-mini-profiler', '~> 0.10'  # Subsequent versions require Ruby 2.3
+  gem 'rack-mini-profiler', '~> 0.10', '>= 0.10.7' # Subsequent versions require Ruby 2.3
   gem 'derailed'
   gem 'heapy', '0.1.1' # Subsequent versions require Ruby 2.3
   gem 'stackprof'
