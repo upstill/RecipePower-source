@@ -219,7 +219,7 @@ GEM
       letter_opener (~> 1.0)
       railties (>= 3.2)
     log_buddy (0.7.0)
-    loofah (2.6.0)
+    loofah (2.19.1)
       crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
     mail (2.7.1)
