@@ -3,7 +3,7 @@ source 'http://rubygems.org'
 ruby '2.6.6'
 gem 'rack', '2.2.3'
 gem 'bundler', '~> 2.1.4'
-gem 'rails', '~> 5.2.4' # 5.0.7.2' #
+gem 'rails', '~> 5.2.4', '>= 5.2.4.3' # 5.0.7.2' #
 gem 'rdoc'
 
 ###### Rails Extensions
@@ -60,7 +60,7 @@ gem 'jquery-ui-rails', '~> 3.0'
 gem 'coffee-rails' # , "~> 4.2"
 gem 'uglifier', '>= 1.3.0'
 ## gem 'compass-rails'
-gem 'sass-rails', " ~> 5.0"
+gem 'sass-rails', '~> 6.0', '>= 6.0.0'
 gem 'bootstrap-sass', '~> 3.3.4' # '~> 3.1.1'
 ## gem 'bootstrap-sass', github: 'thomas-mcdonald/bootstrap-sass', branch: '3'
 gem 'autoprefixer-rails'
