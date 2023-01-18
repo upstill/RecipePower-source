@@ -306,7 +306,7 @@ GEM
     public_suffix (4.0.5)
     pundit (2.1.0)
       activesupport (>= 3.0.0)
-    rack (2.2.3)
+    rack (2.2.6.2)
     rack-mini-profiler (0.10.7)
       rack (>= 1.2.0)
     rack-openid (1.3.1)
@@ -509,7 +509,7 @@ DEPENDENCIES
   poltergeist
   premailer-rails
   pundit
-  rack (= 2.2.3)
+  rack (= 2.2.6.2)
   rack-mini-profiler (~> 0.10)
   rack-rewrite (~> 1.5.0)
   rails (~> 5.2.4)
