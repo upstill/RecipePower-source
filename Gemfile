@@ -19,7 +19,7 @@ gem "simple_form" # , '~> 4.1.0' # https://github.com/plataformatec/simple_form
 gem 'draper' # , '~> 3.0' #, ~> 1.3'
 # Easily and efficiently make your ActiveRecord models support hierarchies
 gem 'closure_tree', '~> 7.0' # https://github.com/mceachen/closure_tree
-gem 'with_advisory_lock', '~> 4.0'
+gem 'with_advisory_lock', '~> 5.0', '>= 5.0.0'
 # TODO Cache bit in each tag, for each taggable entity class, indicating that the tag is used.
 ## gem 'attr_bitwise' # https://github.com/wittydeveloper/attr_bitwise/
 gem 'barkick' # Handle UPC codes, etc.
