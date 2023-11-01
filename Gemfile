@@ -81,7 +81,7 @@ gem 'pundit'
 # gem 'declarative_authorization', git: 'http://github.com/stffn/declarative_authorization.git'     # simple auth rules/roles, create config/authorization_rules.rb, add filter_resource_access to each controller, use permitted_to? in views
 
 ###### Essential Ruby libs
-gem "rmagick", "~> 2.16.0"
+gem "rmagick", "~> 5.3.0"
 gem "feedjira", '~> 1.6' #:git => 'git://github.com/pauldix/feedzirra.git'
 gem 'nokogiri', ">= 1.10.8" # "~> 1.5.3"
 gem 'truncato' # ,  '0.7.8' # Truncates HTML strings, respecting tags https://github.com/jorgemanrubia/truncato
