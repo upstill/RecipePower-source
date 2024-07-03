@@ -51,7 +51,7 @@ gem 'unicorn-rails'
 gem 'thin'
 
 # Activity Notification
-gem 'activity_notification' # , '1.4.4', :path => 'vendor/gems/activity_notification-1.4.4'
+gem 'activity_notification' , '>= 2.3.0' # , '1.4.4', :path => 'vendor/gems/activity_notification-1.4.4'
 
 ####### JQuery, Coffeescript and Bootstrap
 gem 'jquery-rails', '~> 4.1.0' # '~> 4.2.0' # '~> 4.3.3' # ~> 4.0' # '2.2.1' to get jQuery 1.9.1
