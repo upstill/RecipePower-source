@@ -1,9 +1,9 @@
 source 'http://rubygems.org'
 
 ruby '2.6.6'
-gem 'rack', '2.2.3'
+gem 'rack', '2.2.11'
 gem 'bundler', '~> 2.1.4'
-gem 'rails', '~> 5.2.4' # 5.0.7.2' #
+gem 'rails', '~> 7.0.0' # 5.0.7.2' #
 gem 'rdoc'
 
 ###### Rails Extensions
@@ -56,11 +56,11 @@ gem 'activity_notification' # , '1.4.4', :path => 'vendor/gems/activity_notifica
 ####### JQuery, Coffeescript and Bootstrap
 gem 'jquery-rails', '~> 4.1.0' # '~> 4.2.0' # '~> 4.3.3' # ~> 4.0' # '2.2.1' to get jQuery 1.9.1
 ## gem 'jquery-rails-google-cdn'
-gem 'jquery-ui-rails', '~> 3.0'
+gem 'jquery-ui-rails', '~> 4.0', '>= 4.0.5'
 gem 'coffee-rails' # , "~> 4.2"
 gem 'uglifier', '>= 1.3.0'
 ## gem 'compass-rails'
-gem 'sass-rails', " ~> 5.0"
+gem 'sass-rails', '~> 6.0', '>= 6.0.0'
 gem 'bootstrap-sass', '~> 3.3.4' # '~> 3.1.1'
 ## gem 'bootstrap-sass', github: 'thomas-mcdonald/bootstrap-sass', branch: '3'
 gem 'autoprefixer-rails'
