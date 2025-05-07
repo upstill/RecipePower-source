@@ -156,7 +156,7 @@ group :test do
   gem 'factory_bot_rails' # 'factory_girl_rails', "~> 4.0"
   gem "mocha"
   gem 'poltergeist'
-  gem 'rspec-rails', '3.8.1'
+  gem 'rspec-rails', '8.0.0'
   # gem 'rspec-html-matchers', '0.9.1'
 end
 
