@@ -74,8 +74,8 @@ gem 'devise', '~> 4.0'                       # auth, rails generate devise:insta
 gem 'devise_invitable', '~> 1.6' # git: 'git://github.com/scambra/devise_invitable.git'
 gem 'ruby-openid'
 gem 'omniauth-twitter'
-gem 'omniauth-facebook', '~> 4.0.0'
-gem 'omniauth-google-oauth2'
+gem 'omniauth-facebook', '~> 5.0.0'
+gem 'omniauth-google-oauth2', '>= 0.8.1'
 gem 'omniauth-openid'
 gem 'pundit'
 # gem 'declarative_authorization', git: 'http://github.com/stffn/declarative_authorization.git'     # simple auth rules/roles, create config/authorization_rules.rb, add filter_resource_access to each controller, use permitted_to? in views
